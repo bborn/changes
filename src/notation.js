@@ -1,23 +1,23 @@
 import {notationEvents} from './notation-model.js';
 let loading;
 function loadRenderer(){return loading ||= new Promise((resolve,reject)=>{if(globalThis.Vex?.Flow){resolve(globalThis.Vex.Flow);return;}const script=document.createElement('script');script.src='/src/vendor/vexflow.js';script.onload=()=>resolve(globalThis.Vex.Flow);script.onerror=()=>{loading=null;script.remove();reject(Error('Could not load notation.'));};document.head.append(script);});}
-export async function mountNotation(root,tune,{mode,hints,positionHints=true,onPreview,onReady}){
+export async function mountNotation(root,tune,{mode,hints,positionHints=true,compact=false,onPreview,onReady}){
  if(mode==='tab')return;
  let VF;try{VF=await loadRenderer();}catch(error){root.querySelectorAll('[data-score]').forEach(el=>el.textContent=error.message);return;}
  for(const host of root.querySelectorAll('[data-score]')){
   if(!host.isConnected)return;
   if(host.dataset.rendered)continue;host.dataset.rendered='true';
   const [fi,bi]=host.dataset.score.split('-').map(Number),section=tune.sections[tune.form[fi]],events=JSON.parse(host.dataset.events);
-  try{drawBar(VF,host,events,{key:tune.key,meter:tune.timeSignature,mode,hints,positionHints,onPreview,section,fi,bi});}
+  try{drawBar(VF,host,events,{key:tune.key,meter:tune.timeSignature,mode,hints,positionHints,compact,onPreview,section,fi,bi});}
   catch(error){host.textContent='Notation is unavailable for this bar.';host.classList.add('notation-error');console.warn('Notation bar',fi,bi,error);}
  }
  onReady?.();
 }
-function drawBar(VF,host,events,{key,meter,mode,hints,positionHints,onPreview,fi,bi}){
+function drawBar(VF,host,events,{key,meter,mode,hints,positionHints,compact,onPreview,fi,bi}){
  const {Renderer,Stave,StaveNote,Voice,Formatter,Accidental,Dot,Beam,Tuplet,StaveTie}=VF;
  key=({Dbm:'C#m',Gbm:'F#m',Abm:'G#m'})[key]||key;
  const parts=notationEvents(events,key,meter),both=mode==='both';
- const width=Math.max(330,host.clientWidth,125+parts.length*31),height=both?280:hints?190:166;
+ const width=Math.max(330,host.clientWidth,125+parts.length*31),height=both?280:hints?190:compact?130:166;
  const renderer=new Renderer(host,Renderer.Backends.SVG);renderer.resize(width,height);const ctx=renderer.getContext();ctx.setFillStyle('#263d33');ctx.setStrokeStyle('#263d33');
  const stave=new Stave(4,20,width-8).addClef('treble').addKeySignature(key).addTimeSignature(meter);stave.setContext(ctx).draw();
  const notes=parts.map(p=>{const n=new StaveNote({clef:'treble',keys:[p.pitch?.key||'b/4'],duration:p.duration+(p.pitch?'':'r'),dots:p.dots,auto_stem:true});for(let i=0;i<p.dots;i++)Dot.buildAndAttach([n],{all:true});return n;});
@@ -28,7 +28,7 @@ function drawBar(VF,host,events,{key,meter,mode,hints,positionHints,onPreview,fi
  new Formatter().joinVoices([voice]).format([voice],width-stave.getNoteStartX()-20);
  voice.draw(ctx,stave);beams.forEach(b=>b.setContext(ctx).draw());tuplets.forEach(t=>t.setContext(ctx).draw());
  parts.forEach((p,i)=>{if(!p.pitch||!p.continued)return;const previous=i?notes[i-1]:undefined;if(i&&parts[i-1].midi!==p.midi)return;new StaveTie({first_note:previous,last_note:notes[i],first_indices:[0],last_indices:[0]}).setContext(ctx).draw();});
- const svg=host.querySelector('svg'),NS='http://www.w3.org/2000/svg';svg.setAttribute('role','group');svg.setAttribute('aria-label',both?'Notation aligned with guitar tab':'Standard notation');
+ const svg=host.querySelector('svg'),NS='http://www.w3.org/2000/svg';svg.setAttribute('viewBox',`0 0 ${width} ${height}`);if(compact){svg.style.width='100%';svg.style.height='auto';}svg.setAttribute('role','group');svg.setAttribute('aria-label',both?'Notation aligned with guitar tab':'Standard notation');
  const add=(tag,attributes,text)=>{const el=document.createElementNS(NS,tag);for(const [k,v]of Object.entries({stroke:'none',...attributes}))el.setAttribute(k,v);if(text!==undefined)el.textContent=text;svg.append(el);return el;};
  if(both)for(let s=0;s<6;s++){const y=178+s*15;add('text',{x:8,y:y+4,'font-size':10,fill:'#788172'},['e','B','G','D','A','E'][s]);add('line',{x1:26,x2:width-8,y1:y,y2:y,stroke:'#b6baac'});}
  parts.forEach((p,i)=>{

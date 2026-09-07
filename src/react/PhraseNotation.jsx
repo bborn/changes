@@ -23,6 +23,7 @@ export function PhraseNotation({ phrase, bar, tune, onPreview, showSwing }) {
     mountNotation(root.current, scoreTune, {
       mode: "notes",
       hints: false,
+      compact: true,
       onPreview,
     });
   }, [scoreTune, events, onPreview]);

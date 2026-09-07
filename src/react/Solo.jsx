@@ -140,6 +140,7 @@ export function Solo({ state, actions, engine }) {
       (state.soloFollow && active) ||
       phrases.find((p) => p.id === state.soloPage) ||
       phrases[0];
+
   useEffect(() => {
     const scroller = root.current?.querySelector(".phrase-scroll");
     if (!scroller || !chosen || scroller.dataset.shown === chosen.id) return;
@@ -183,6 +184,22 @@ export function Solo({ state, actions, engine }) {
       scroller.removeEventListener("scrollend", reset);
     };
   }, [chosen?.id, state.playing, state.soloFollow, phrases]);
+  useEffect(() => {
+    if (instrument !== "piano" || !state.soloFollow) return;
+    const guide = root.current;
+    const reveal = () => {
+      const card = guide?.querySelector(".phrase-page");
+      const transportTop = document.querySelector(".transport")?.getBoundingClientRect().top ?? innerHeight;
+      if (!card || card.getBoundingClientRect().bottom <= transportTop) return;
+      const tabsHeight = document.querySelector(".view-bar")?.getBoundingClientRect().height ?? 0;
+      const delta = guide.getBoundingClientRect().top - tabsHeight - 8;
+      if (delta > 0) window.scrollBy({top: delta, behavior: "instant"});
+    };
+    const observer = new ResizeObserver(reveal);
+    if (guide) observer.observe(guide);
+    const frame = requestAnimationFrame(reveal);
+    return () => { cancelAnimationFrame(frame); observer.disconnect(); };
+  }, [instrument, state.playing, state.soloFollow, state.soloLevel, state.soloRegister]);
   useEffect(() => {
     const scroller = root.current?.querySelector(".phrase-scroll");
     if (!scroller) return;
@@ -264,7 +281,7 @@ export function Solo({ state, actions, engine }) {
     ),
   ];
   return (
-    <section className="solo-guide" ref={root}>
+    <section className={`solo-guide${instrument === "piano" ? " piano-solo" : ""}`} ref={root}>
       <div className="solo-toolbar">
         <div className="solo-mode">
           <button
