@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.dev/
+.local/
+.wrangler/
+.env*
+.dev.vars*
+.DS_Store
+__pycache__/
+*.pyc
+tunes/*
+!tunes/.gitkeep
+scripts/vendor/
+data/melody-sources.json
+wrangler.jsonc
+*.sql.dump

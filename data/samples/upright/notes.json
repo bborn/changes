@@ -1,0 +1,27 @@
+{
+  "c2": {
+    "file": "sneakybass_c2_pluck_rr1.wav",
+    "midi": 36,
+    "cents": 25
+  },
+  "eb2": {
+    "file": "sneakybass_eb2_pluck_rr1.wav",
+    "midi": 39,
+    "cents": 33
+  },
+  "a2": {
+    "file": "sneakybass_a2_pluck_rr1.wav",
+    "midi": 45,
+    "cents": 0
+  },
+  "c3": {
+    "file": "sneakybass_c3_pluck_rr1.wav",
+    "midi": 48,
+    "cents": 12
+  },
+  "eb3": {
+    "file": "sneakybass_eb3_pluck_rr1.wav",
+    "midi": 51,
+    "cents": 0
+  }
+}

@@ -1,0 +1,2 @@
+// Artificial timing fixture, not a transcription of a song.
+export const tune = {slug:'synthetic-test',title:'Timing fixture',key:'C',tempo:100,style:'swing',timeSignature:'4/4',form:['A'],sections:{A:{label:'A',bars:[['Cmaj7'],['Cmaj7']],melody:[[{midi:null,beat:0,duration:1},{midi:60,beat:1,duration:1},{midi:67,beat:2,duration:2}],[{midi:64,beat:0,duration:2},{midi:null,beat:2,duration:2}]]}}};

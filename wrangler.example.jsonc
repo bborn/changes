@@ -1,0 +1,15 @@
+{
+  "name": "your-changes-app",
+  "pages_build_output_dir": "./dist",
+  "compatibility_date": "2026-09-06",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "your-changes-library",
+      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+    }
+  ],
+  "vars": {
+    "PERSONAL_LIBRARY_ID": "REPLACE_WITH_YOUR_LIBRARY_UUID"
+  }
+}

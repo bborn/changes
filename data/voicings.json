@@ -1,0 +1,1307 @@
+[
+  {
+    "quality": "maj7",
+    "name": "Root on 6th string",
+    "rootString": 6,
+    "shape": [
+      "R",
+      "x",
+      "7",
+      "3",
+      "5",
+      "x"
+    ],
+    "fretsFromRoot": [
+      0,
+      null,
+      1,
+      1,
+      0,
+      null
+    ],
+    "fingers": [
+      1,
+      null,
+      2,
+      2,
+      1,
+      null
+    ]
+  },
+  {
+    "quality": "maj7",
+    "name": "Root on 5th string",
+    "rootString": 5,
+    "shape": [
+      "x",
+      "R",
+      "5",
+      "7",
+      "3",
+      "x"
+    ],
+    "fretsFromRoot": [
+      null,
+      0,
+      2,
+      1,
+      2,
+      null
+    ],
+    "fingers": [
+      null,
+      1,
+      3,
+      2,
+      3,
+      null
+    ]
+  },
+  {
+    "quality": "maj7",
+    "name": "Upper strings",
+    "rootString": 4,
+    "shape": [
+      "x",
+      "x",
+      "R",
+      "5",
+      "7",
+      "3"
+    ],
+    "fretsFromRoot": [
+      null,
+      null,
+      0,
+      2,
+      2,
+      2
+    ],
+    "fingers": [
+      null,
+      null,
+      1,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "quality": "m7",
+    "name": "Root on 6th string",
+    "rootString": 6,
+    "shape": [
+      "R",
+      "x",
+      "b7",
+      "b3",
+      "5",
+      "x"
+    ],
+    "fretsFromRoot": [
+      0,
+      null,
+      0,
+      0,
+      0,
+      null
+    ],
+    "fingers": [
+      1,
+      null,
+      1,
+      1,
+      1,
+      null
+    ]
+  },
+  {
+    "quality": "m7",
+    "name": "Root on 5th string",
+    "rootString": 5,
+    "shape": [
+      "x",
+      "R",
+      "5",
+      "b7",
+      "b3",
+      "x"
+    ],
+    "fretsFromRoot": [
+      null,
+      0,
+      2,
+      0,
+      1,
+      null
+    ],
+    "fingers": [
+      null,
+      1,
+      3,
+      1,
+      2,
+      null
+    ]
+  },
+  {
+    "quality": "m7",
+    "name": "Upper strings",
+    "rootString": 4,
+    "shape": [
+      "x",
+      "x",
+      "R",
+      "5",
+      "b7",
+      "b3"
+    ],
+    "fretsFromRoot": [
+      null,
+      null,
+      0,
+      2,
+      1,
+      1
+    ],
+    "fingers": [
+      null,
+      null,
+      1,
+      3,
+      2,
+      2
+    ]
+  },
+  {
+    "quality": "7",
+    "name": "Root on 6th string",
+    "rootString": 6,
+    "shape": [
+      "R",
+      "x",
+      "b7",
+      "3",
+      "5",
+      "x"
+    ],
+    "fretsFromRoot": [
+      0,
+      null,
+      0,
+      1,
+      0,
+      null
+    ],
+    "fingers": [
+      1,
+      null,
+      1,
+      2,
+      1,
+      null
+    ]
+  },
+  {
+    "quality": "7",
+    "name": "Root on 5th string",
+    "rootString": 5,
+    "shape": [
+      "x",
+      "R",
+      "5",
+      "b7",
+      "3",
+      "x"
+    ],
+    "fretsFromRoot": [
+      null,
+      0,
+      2,
+      0,
+      2,
+      null
+    ],
+    "fingers": [
+      null,
+      1,
+      2,
+      1,
+      2,
+      null
+    ]
+  },
+  {
+    "quality": "7",
+    "name": "Upper strings",
+    "rootString": 4,
+    "shape": [
+      "x",
+      "x",
+      "R",
+      "5",
+      "b7",
+      "3"
+    ],
+    "fretsFromRoot": [
+      null,
+      null,
+      0,
+      2,
+      1,
+      2
+    ],
+    "fingers": [
+      null,
+      null,
+      1,
+      3,
+      2,
+      3
+    ]
+  },
+  {
+    "quality": "m7b5",
+    "name": "Root on 6th string",
+    "rootString": 6,
+    "shape": [
+      "R",
+      "x",
+      "b7",
+      "b3",
+      "b5",
+      "x"
+    ],
+    "fretsFromRoot": [
+      0,
+      null,
+      0,
+      0,
+      -1,
+      null
+    ],
+    "fingers": [
+      2,
+      null,
+      2,
+      2,
+      1,
+      null
+    ]
+  },
+  {
+    "quality": "m7b5",
+    "name": "Root on 5th string",
+    "rootString": 5,
+    "shape": [
+      "x",
+      "R",
+      "b5",
+      "b7",
+      "b3",
+      "x"
+    ],
+    "fretsFromRoot": [
+      null,
+      0,
+      1,
+      0,
+      1,
+      null
+    ],
+    "fingers": [
+      null,
+      1,
+      2,
+      1,
+      2,
+      null
+    ]
+  },
+  {
+    "quality": "m7b5",
+    "name": "Upper strings",
+    "rootString": 4,
+    "shape": [
+      "x",
+      "x",
+      "R",
+      "b5",
+      "b7",
+      "b3"
+    ],
+    "fretsFromRoot": [
+      null,
+      null,
+      0,
+      1,
+      1,
+      1
+    ],
+    "fingers": [
+      null,
+      null,
+      1,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "quality": "dim7",
+    "name": "Root on 6th string",
+    "rootString": 6,
+    "shape": [
+      "R",
+      "x",
+      "bb7",
+      "b3",
+      "b5",
+      "x"
+    ],
+    "fretsFromRoot": [
+      0,
+      null,
+      -1,
+      0,
+      -1,
+      null
+    ],
+    "fingers": [
+      2,
+      null,
+      1,
+      2,
+      1,
+      null
+    ]
+  },
+  {
+    "quality": "dim7",
+    "name": "Root on 5th string",
+    "rootString": 5,
+    "shape": [
+      "x",
+      "R",
+      "b5",
+      "bb7",
+      "b3",
+      "x"
+    ],
+    "fretsFromRoot": [
+      null,
+      0,
+      1,
+      -1,
+      1,
+      null
+    ],
+    "fingers": [
+      null,
+      2,
+      3,
+      1,
+      3,
+      null
+    ]
+  },
+  {
+    "quality": "dim7",
+    "name": "Upper strings",
+    "rootString": 4,
+    "shape": [
+      "x",
+      "x",
+      "R",
+      "b5",
+      "bb7",
+      "b3"
+    ],
+    "fretsFromRoot": [
+      null,
+      null,
+      0,
+      1,
+      0,
+      1
+    ],
+    "fingers": [
+      null,
+      null,
+      1,
+      2,
+      1,
+      2
+    ]
+  },
+  {
+    "quality": "6",
+    "name": "Root on 6th string",
+    "rootString": 6,
+    "shape": [
+      "R",
+      "x",
+      "6",
+      "3",
+      "5",
+      "x"
+    ],
+    "fretsFromRoot": [
+      0,
+      null,
+      -1,
+      1,
+      0,
+      null
+    ],
+    "fingers": [
+      2,
+      null,
+      1,
+      3,
+      2,
+      null
+    ]
+  },
+  {
+    "quality": "6",
+    "name": "Root on 5th string",
+    "rootString": 5,
+    "shape": [
+      "x",
+      "R",
+      "5",
+      "6",
+      "3",
+      "x"
+    ],
+    "fretsFromRoot": [
+      null,
+      0,
+      2,
+      -1,
+      2,
+      null
+    ],
+    "fingers": [
+      null,
+      2,
+      3,
+      1,
+      3,
+      null
+    ]
+  },
+  {
+    "quality": "6",
+    "name": "Upper strings",
+    "rootString": 4,
+    "shape": [
+      "x",
+      "x",
+      "R",
+      "5",
+      "6",
+      "3"
+    ],
+    "fretsFromRoot": [
+      null,
+      null,
+      0,
+      2,
+      0,
+      2
+    ],
+    "fingers": [
+      null,
+      null,
+      1,
+      2,
+      1,
+      2
+    ]
+  },
+  {
+    "quality": "m6",
+    "name": "Root on 6th string",
+    "rootString": 6,
+    "shape": [
+      "R",
+      "x",
+      "6",
+      "b3",
+      "5",
+      "x"
+    ],
+    "fretsFromRoot": [
+      0,
+      null,
+      -1,
+      0,
+      0,
+      null
+    ],
+    "fingers": [
+      2,
+      null,
+      1,
+      2,
+      2,
+      null
+    ]
+  },
+  {
+    "quality": "m6",
+    "name": "Root on 5th string",
+    "rootString": 5,
+    "shape": [
+      "x",
+      "R",
+      "5",
+      "6",
+      "b3",
+      "x"
+    ],
+    "fretsFromRoot": [
+      null,
+      0,
+      2,
+      -1,
+      1,
+      null
+    ],
+    "fingers": [
+      null,
+      2,
+      4,
+      1,
+      3,
+      null
+    ]
+  },
+  {
+    "quality": "m6",
+    "name": "Upper strings",
+    "rootString": 4,
+    "shape": [
+      "x",
+      "x",
+      "R",
+      "5",
+      "6",
+      "b3"
+    ],
+    "fretsFromRoot": [
+      null,
+      null,
+      0,
+      2,
+      0,
+      1
+    ],
+    "fingers": [
+      null,
+      null,
+      1,
+      3,
+      1,
+      2
+    ]
+  },
+  {
+    "quality": "maj",
+    "name": "Root on 6th string",
+    "rootString": 6,
+    "shape": [
+      "R",
+      "x",
+      "R",
+      "3",
+      "5",
+      "x"
+    ],
+    "fretsFromRoot": [
+      0,
+      null,
+      2,
+      1,
+      0,
+      null
+    ],
+    "fingers": [
+      1,
+      null,
+      3,
+      2,
+      1,
+      null
+    ]
+  },
+  {
+    "quality": "maj",
+    "name": "Root on 5th string",
+    "rootString": 5,
+    "shape": [
+      "x",
+      "R",
+      "5",
+      "R",
+      "3",
+      "x"
+    ],
+    "fretsFromRoot": [
+      null,
+      0,
+      2,
+      2,
+      2,
+      null
+    ],
+    "fingers": [
+      null,
+      1,
+      2,
+      2,
+      2,
+      null
+    ]
+  },
+  {
+    "quality": "maj",
+    "name": "Upper strings",
+    "rootString": 4,
+    "shape": [
+      "x",
+      "x",
+      "R",
+      "5",
+      "R",
+      "3"
+    ],
+    "fretsFromRoot": [
+      null,
+      null,
+      0,
+      2,
+      3,
+      2
+    ],
+    "fingers": [
+      null,
+      null,
+      1,
+      2,
+      3,
+      2
+    ]
+  },
+  {
+    "quality": "m",
+    "name": "Root on 6th string",
+    "rootString": 6,
+    "shape": [
+      "R",
+      "x",
+      "R",
+      "b3",
+      "5",
+      "x"
+    ],
+    "fretsFromRoot": [
+      0,
+      null,
+      2,
+      0,
+      0,
+      null
+    ],
+    "fingers": [
+      1,
+      null,
+      2,
+      1,
+      1,
+      null
+    ]
+  },
+  {
+    "quality": "m",
+    "name": "Root on 5th string",
+    "rootString": 5,
+    "shape": [
+      "x",
+      "R",
+      "5",
+      "R",
+      "b3",
+      "x"
+    ],
+    "fretsFromRoot": [
+      null,
+      0,
+      2,
+      2,
+      1,
+      null
+    ],
+    "fingers": [
+      null,
+      1,
+      3,
+      3,
+      2,
+      null
+    ]
+  },
+  {
+    "quality": "m",
+    "name": "Upper strings",
+    "rootString": 4,
+    "shape": [
+      "x",
+      "x",
+      "R",
+      "5",
+      "R",
+      "b3"
+    ],
+    "fretsFromRoot": [
+      null,
+      null,
+      0,
+      2,
+      3,
+      1
+    ],
+    "fingers": [
+      null,
+      null,
+      1,
+      3,
+      4,
+      2
+    ]
+  },
+  {
+    "quality": "sus4",
+    "name": "Root on 6th string",
+    "rootString": 6,
+    "shape": [
+      "R",
+      "x",
+      "R",
+      "4",
+      "5",
+      "x"
+    ],
+    "fretsFromRoot": [
+      0,
+      null,
+      2,
+      2,
+      0,
+      null
+    ],
+    "fingers": [
+      1,
+      null,
+      2,
+      2,
+      1,
+      null
+    ]
+  },
+  {
+    "quality": "sus4",
+    "name": "Root on 5th string",
+    "rootString": 5,
+    "shape": [
+      "x",
+      "R",
+      "5",
+      "R",
+      "4",
+      "x"
+    ],
+    "fretsFromRoot": [
+      null,
+      0,
+      2,
+      2,
+      3,
+      null
+    ],
+    "fingers": [
+      null,
+      1,
+      2,
+      2,
+      3,
+      null
+    ]
+  },
+  {
+    "quality": "sus4",
+    "name": "Upper strings",
+    "rootString": 4,
+    "shape": [
+      "x",
+      "x",
+      "R",
+      "5",
+      "R",
+      "4"
+    ],
+    "fretsFromRoot": [
+      null,
+      null,
+      0,
+      2,
+      3,
+      3
+    ],
+    "fingers": [
+      null,
+      null,
+      1,
+      2,
+      3,
+      3
+    ]
+  },
+  {
+    "quality": "9",
+    "name": "Root on 6th string",
+    "rootString": 6,
+    "shape": [
+      "R",
+      "x",
+      "b7",
+      "3",
+      "x",
+      "9"
+    ],
+    "fretsFromRoot": [
+      0,
+      null,
+      0,
+      1,
+      null,
+      2
+    ],
+    "fingers": [
+      1,
+      null,
+      1,
+      2,
+      null,
+      3
+    ]
+  },
+  {
+    "quality": "9",
+    "name": "Root on 5th string",
+    "rootString": 5,
+    "shape": [
+      "x",
+      "R",
+      "3",
+      "b7",
+      "9",
+      "x"
+    ],
+    "fretsFromRoot": [
+      null,
+      0,
+      -1,
+      0,
+      0,
+      null
+    ],
+    "fingers": [
+      null,
+      2,
+      1,
+      2,
+      2,
+      null
+    ]
+  },
+  {
+    "quality": "9",
+    "name": "Upper strings",
+    "rootString": 4,
+    "shape": [
+      "x",
+      "x",
+      "3",
+      "b7",
+      "9",
+      "5"
+    ],
+    "fretsFromRoot": [
+      null,
+      null,
+      4,
+      5,
+      5,
+      5
+    ],
+    "fingers": [
+      null,
+      null,
+      1,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "quality": "7b9",
+    "name": "Root on 6th string",
+    "rootString": 6,
+    "shape": [
+      "R",
+      "x",
+      "b7",
+      "3",
+      "x",
+      "b9"
+    ],
+    "fretsFromRoot": [
+      0,
+      null,
+      0,
+      1,
+      null,
+      1
+    ],
+    "fingers": [
+      1,
+      null,
+      1,
+      2,
+      null,
+      2
+    ]
+  },
+  {
+    "quality": "7b9",
+    "name": "Root on 5th string",
+    "rootString": 5,
+    "shape": [
+      "x",
+      "R",
+      "3",
+      "b7",
+      "b9",
+      "x"
+    ],
+    "fretsFromRoot": [
+      null,
+      0,
+      -1,
+      0,
+      -1,
+      null
+    ],
+    "fingers": [
+      null,
+      2,
+      1,
+      2,
+      1,
+      null
+    ]
+  },
+  {
+    "quality": "7b9",
+    "name": "Upper strings",
+    "rootString": 4,
+    "shape": [
+      "x",
+      "x",
+      "3",
+      "b7",
+      "b9",
+      "5"
+    ],
+    "fretsFromRoot": [
+      null,
+      null,
+      4,
+      5,
+      4,
+      5
+    ],
+    "fingers": [
+      null,
+      null,
+      1,
+      2,
+      1,
+      2
+    ]
+  },
+  {
+    "quality": "7#9",
+    "name": "Root on 6th string",
+    "rootString": 6,
+    "shape": [
+      "R",
+      "x",
+      "b7",
+      "3",
+      "x",
+      "#9"
+    ],
+    "fretsFromRoot": [
+      0,
+      null,
+      0,
+      1,
+      null,
+      3
+    ],
+    "fingers": [
+      1,
+      null,
+      1,
+      2,
+      null,
+      3
+    ]
+  },
+  {
+    "quality": "7#9",
+    "name": "Root on 5th string",
+    "rootString": 5,
+    "shape": [
+      "x",
+      "R",
+      "3",
+      "b7",
+      "#9",
+      "x"
+    ],
+    "fretsFromRoot": [
+      null,
+      0,
+      -1,
+      0,
+      1,
+      null
+    ],
+    "fingers": [
+      null,
+      2,
+      1,
+      2,
+      3,
+      null
+    ]
+  },
+  {
+    "quality": "7#9",
+    "name": "Upper strings",
+    "rootString": 4,
+    "shape": [
+      "x",
+      "x",
+      "3",
+      "b7",
+      "#9",
+      "5"
+    ],
+    "fretsFromRoot": [
+      null,
+      null,
+      4,
+      5,
+      6,
+      5
+    ],
+    "fingers": [
+      null,
+      null,
+      1,
+      2,
+      3,
+      2
+    ]
+  },
+  {
+    "quality": "7#11",
+    "name": "Root on 6th string",
+    "rootString": 6,
+    "shape": [
+      "R",
+      "x",
+      "b7",
+      "3",
+      "#11",
+      "x"
+    ],
+    "fretsFromRoot": [
+      0,
+      null,
+      0,
+      1,
+      -1,
+      null
+    ],
+    "fingers": [
+      2,
+      null,
+      2,
+      3,
+      1,
+      null
+    ]
+  },
+  {
+    "quality": "7#11",
+    "name": "Root on 5th string",
+    "rootString": 5,
+    "shape": [
+      "x",
+      "R",
+      "3",
+      "b7",
+      "x",
+      "#11"
+    ],
+    "fretsFromRoot": [
+      null,
+      0,
+      -1,
+      0,
+      null,
+      -1
+    ],
+    "fingers": [
+      null,
+      2,
+      1,
+      2,
+      null,
+      1
+    ]
+  },
+  {
+    "quality": "7#11",
+    "name": "Upper strings",
+    "rootString": 4,
+    "shape": [
+      "x",
+      "x",
+      "3",
+      "b7",
+      "9",
+      "#11"
+    ],
+    "fretsFromRoot": [
+      null,
+      null,
+      4,
+      5,
+      5,
+      4
+    ],
+    "fingers": [
+      null,
+      null,
+      1,
+      2,
+      2,
+      1
+    ]
+  },
+  {
+    "quality": "13",
+    "name": "Root on 6th string",
+    "rootString": 6,
+    "shape": [
+      "R",
+      "x",
+      "b7",
+      "3",
+      "13",
+      "x"
+    ],
+    "fretsFromRoot": [
+      0,
+      null,
+      0,
+      1,
+      2,
+      null
+    ],
+    "fingers": [
+      1,
+      null,
+      1,
+      2,
+      3,
+      null
+    ]
+  },
+  {
+    "quality": "13",
+    "name": "Root on 5th string",
+    "rootString": 5,
+    "shape": [
+      "x",
+      "R",
+      "x",
+      "b7",
+      "3",
+      "13"
+    ],
+    "fretsFromRoot": [
+      null,
+      0,
+      null,
+      0,
+      2,
+      2
+    ],
+    "fingers": [
+      null,
+      1,
+      null,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "quality": "13",
+    "name": "Upper strings",
+    "rootString": 4,
+    "shape": [
+      "x",
+      "x",
+      "3",
+      "b7",
+      "9",
+      "13"
+    ],
+    "fretsFromRoot": [
+      null,
+      null,
+      4,
+      5,
+      5,
+      7
+    ],
+    "fingers": [
+      null,
+      null,
+      1,
+      2,
+      2,
+      3
+    ]
+  }
+]
