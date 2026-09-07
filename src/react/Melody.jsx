@@ -6,6 +6,7 @@ import { SvgMarkup } from "./SvgMarkup.jsx";
 
 function MelodyBar({ state, events, chords, fi, bi, number, actions }) {
   const key = `${fi}-${bi}`,
+    melodyMode = (state.instrument || "guitar") === "guitar" ? state.melodyMode : "notes",
     active =
       (state.playing || state.paused) &&
       !state.counting &&
@@ -29,7 +30,7 @@ function MelodyBar({ state, events, chords, fi, bi, number, actions }) {
       <small>
         {number} <b>{chords.join(" → ")}</b>
       </small>
-      {state.melodyMode === "tab" ? (
+      {melodyMode === "tab" ? (
         <SvgMarkup
           html={renderTab(events, { previewPrefix: key })}
           onClick={playEvent}
@@ -37,7 +38,7 @@ function MelodyBar({ state, events, chords, fi, bi, number, actions }) {
         />
       ) : (
         <div className="score-scroll">
-          <div data-score={key} data-events={JSON.stringify(events)} />
+          <div key={`${key}-${melodyMode}`} data-score={key} data-events={JSON.stringify(events)} />
         </div>
       )}
     </article>
@@ -45,11 +46,26 @@ function MelodyBar({ state, events, chords, fi, bi, number, actions }) {
 }
 
 export function Melody({ state, actions }) {
+  const guitar = (state.instrument || "guitar") === "guitar";
+  const melodyMode = guitar ? state.melodyMode : "notes";
   const root = useRef(null),
     [hint, setHint] = useState(
-      state.readingHints ? "Tap a note for its fret position." : "",
+      state.readingHints
+        ? guitar
+          ? "Tap a note for its fret position."
+          : "Tap a note to hear it."
+        : "",
     );
   const hasMelody = Boolean(state.tune.sections[state.tune.form[0]].melody);
+  useEffect(() => {
+    setHint(
+      state.readingHints
+        ? guitar
+          ? "Tap a note for its fret position."
+          : "Tap a note to hear it."
+        : "",
+    );
+  }, [guitar, state.readingHints]);
   const bars = useMemo(
     () =>
       state.tune.form.flatMap((id, fi) => {
@@ -74,11 +90,12 @@ export function Melody({ state, actions }) {
     [hasMelody, state.tune, state.loop],
   );
   useEffect(() => {
-    if (!hasMelody || state.melodyMode === "tab") return;
+    if (!hasMelody || melodyMode === "tab") return;
     let live = true;
     mountNotation(root.current, state.tune, {
-      mode: state.melodyMode,
+      mode: melodyMode,
       hints: state.readingHints,
+      positionHints: guitar,
       onPreview: actions.previewNotes,
       onReady: () => {
         if (live && state.formIndex >= 0)
@@ -95,8 +112,9 @@ export function Melody({ state, actions }) {
     hasMelody,
     state.tune,
     state.loop,
-    state.melodyMode,
+    melodyMode,
     state.readingHints,
+    guitar,
   ]);
   useEffect(() => {
     if (!hasMelody || state.formIndex < 0) return;
@@ -125,7 +143,7 @@ export function Melody({ state, actions }) {
     state.barIndex,
     state.beat,
     state.melodyBeat,
-    state.melodyMode,
+    melodyMode,
   ]);
   if (!hasMelody)
     return (
@@ -137,7 +155,7 @@ export function Melody({ state, actions }) {
         </p>
 
         <p className="chart-help">
-          Single-note guitar tab. More song melodies are still needed.
+          Single-note melody. More song melodies are still needed.
         </p>
       </article>
     );
@@ -145,28 +163,30 @@ export function Melody({ state, actions }) {
     <div ref={root}>
       <div className="melody-tools">
         <div className="reading-modes" role="group" aria-label="Melody display">
-          {[
+          {(guitar ? [
             ["tab", "Tab"],
             ["both", "Both"],
             ["notes", "Notes"],
-          ].map(([mode, label]) => (
+          ] : [["notes", "Notes"]]).map(([mode, label]) => (
             <button
               key={mode}
               onClick={() => actions.setMelodyMode(mode)}
-              aria-pressed={state.melodyMode === mode}
+              aria-pressed={melodyMode === mode}
             >
               {label}
             </button>
           ))}
         </div>
-        {state.melodyMode !== "tab" && (
+        {melodyMode !== "tab" && (
           <>
             <button
               onClick={() => {
                 actions.setReadingHints(!state.readingHints);
                 setHint(
                   !state.readingHints
-                    ? "Tap a note for its fret position."
+                    ? guitar
+                      ? "Tap a note for its fret position."
+                      : "Tap a note to hear it."
                     : "",
                 );
               }}
@@ -186,11 +206,11 @@ export function Melody({ state, actions }) {
         )}
       </div>
       <div
-        className={`melody-chart ${state.melodyMode !== "tab" ? "reading-chart" : ""}`}
+        className={`melody-chart ${melodyMode !== "tab" ? "reading-chart" : ""}`}
       >
         {[0, 1, 2].map((cycle) => (
           <div
-            className={`melody-cycle ${state.melodyMode !== "tab" ? "reading-chart" : ""}`}
+            className={`melody-cycle ${melodyMode !== "tab" ? "reading-chart" : ""}`}
             data-melody-cycle={cycle}
             key={cycle}
           >
