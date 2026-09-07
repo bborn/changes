@@ -284,6 +284,7 @@ function Settings({ state, actions }) {
           <button onClick={actions.exportSong}>Export JSON</button>
         </div>
       )}
+      <a className="settings-github" href="https://github.com/bborn/changes" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
     </section>
   );
 }

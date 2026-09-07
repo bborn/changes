@@ -85,3 +85,5 @@ button{transition:scale 180ms cubic-bezier(.2,.8,.3,1),background-color 160ms,co
 @media(max-width:760px){.view-bar{position:sticky;top:0;z-index:10;background:var(--paper);box-shadow:0 0 0 20px var(--paper)}}
 
 .practice-loop-picker{display:flex;flex-direction:column;gap:8px;margin-top:14px;font-size:14px;grid-column:1/-1}.practice-loop-picker select{width:100%;min-height:44px;min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:8px;color:var(--ink)}
+
+.settings-github{display:flex;align-items:center;min-height:44px;margin-top:12px;font-size:14px;color:var(--muted);text-underline-offset:3px}
