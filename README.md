@@ -8,7 +8,7 @@ A guitar practice app built with React and Web Audio: chord charts and voicings,
 
 **https://jazz-changes.pages.dev/**
 
-The public demo has no song catalog or shared database. Try a basic practice loop, or add/import your own music. Songs and settings stay in your browser's local storage; export songs before clearing browser data or changing devices. Files you import are not uploaded to a server.
+The public demo has no song catalog or shared database. Choose from 14 built-in harmonic exercises (ii–V–I, major/minor blues, turnarounds, rhythm changes, modal and bossa vamps), or add/import your own music. These loops are generic practice progressions, with no standard-song melody transcriptions. Songs and settings stay in your browser's local storage; export songs before clearing browser data or changing devices. Files you import are not uploaded to a server.
 
 The public deployment uses `node scripts/build.mjs --public`, which always excludes local tune files and creates an empty catalog. Deploy that static output without the optional backend Functions or D1 bindings.
 

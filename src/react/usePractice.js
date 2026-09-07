@@ -1,3 +1,4 @@
+import {createPracticeLoop} from '../practice-loops.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AudioEngine } from "../audio/engine.js";
 import { mergeMelodyLibrary } from "../melody-library.js";
@@ -601,9 +602,9 @@ export function usePractice() {
   const actions = useMemo(
     () => ({
       loadTune,
-      tryPracticeLoop: async () => {
+      tryPracticeLoop: async (id = "major-251") => {
         try {
-          const tune = parseSong({title:'Practice loop',key:'C',tempo:100,style:'swing',chart:'A: Dm7 | G7 | Cmaj7 | Cmaj7'});
+          const tune = createPracticeLoop(id);
           await selectSavedSong(await saveCloudSong(tune));
           setField('view','scales');
         } catch(error) { update({error:error.message}); }
