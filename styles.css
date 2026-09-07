@@ -90,3 +90,20 @@ button{transition:scale 180ms cubic-bezier(.2,.8,.3,1),background-color 160ms,co
 .settings-github{display:flex;align-items:center;min-height:44px;margin-top:12px;font-size:14px;color:var(--muted);text-underline-offset:3px}
 .instrument-setting{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 20px;font-size:16px}.instrument-setting select{max-width:65%;min-height:44px;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink)}
 .keyboard{position:relative;display:flex;height:150px;margin:24px 0 18px;padding:0;overflow-x:auto;overflow-y:hidden}.piano-key{position:relative;flex:1 0 38px;min-width:38px;border:1px solid #aeb3a7;border-radius:0 0 5px 5px;background:#fff;padding:0;color:var(--ink)}.piano-key.black{z-index:2;flex:0 0 26px;min-width:26px;height:62%;margin:0 -13px;background:#344139;color:#fff;border-color:#26332b}.piano-key:disabled{opacity:1;cursor:default}.piano-key span{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:600}.piano-key.target{background:#cf6b49;color:#fff}.piano-key.chord{background:#607566;color:#fff}.piano-key.passing{background:#dce2ce;color:var(--ink)}.piano-key.next,.note-names .next{outline:3px solid #6b55a0;outline-offset:-4px}.piano-key.active{box-shadow:inset 0 0 0 4px #e5ad32}.note-names{display:flex;flex-wrap:wrap;gap:9px;margin:24px 0}.note-names button{min-width:44px;border:1px solid var(--line);border-radius:999px;background:#fff;padding:10px 13px}.note-names .target{background:var(--accent);color:#fff}.note-names .chord{background:var(--ink);color:#fff}.note-names .passing{background:#dce2ce}.note-names .active{box-shadow:0 0 0 3px #e5ad32}.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.note-card{max-width:520px}.piano-voicings .keyboard{height:125px}@media(max-width:760px){.keyboard{height:125px}.piano-key{flex-basis:34px;min-width:34px}.piano-key.black{flex-basis:24px;min-width:24px;margin:0 -12px}.piano-voicings .keyboard{height:115px}}
+
+/* Keep the playable phrase first; the keyboard is a compact reference below it. */
+.piano-solo .phrase-page{flex-basis:min(760px,calc(100% - 12px));display:flex;flex-direction:column;padding:12px}
+.piano-solo .phrase-chord-strip{order:0}
+.piano-solo .riff-example{order:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;border-top:0;margin:0;padding:0}
+.piano-solo .riff-example>.phrase-notation{min-width:0;margin:0;overflow-x:auto}
+.piano-solo .riff-example>div:last-child{grid-column:1/-1;justify-content:flex-end;padding:0}
+.piano-solo .riff-example button{min-height:36px;padding:6px 12px}
+.piano-solo .keyboard{order:2;height:90px;margin:12px 0 8px;flex-shrink:0}
+.piano-solo .phrase-legend{order:3;padding:0}
+.piano-solo .phrase-notation svg{display:block;width:100%;height:auto}
+@media(max-width:760px){
+ .piano-solo .riff-example{grid-template-columns:minmax(0,1fr);gap:0}
+ .piano-solo .keyboard{height:72px}
+ .piano-solo .phrase-page{padding:8px}
+ .piano-solo .phrase-chord-strip{margin-bottom:0}
+}
