@@ -541,7 +541,7 @@ export function App() {
             </div>
           </>
         ) : (
-          <section className="scale-card"><h1>{state.loading ? "Loading…" : "Your practice library"}</h1>{!state.loading && <><p>Add your own chart or import song JSON to start practicing.</p><button className="add-song" onClick={actions.findSong}>Add a song</button></>}</section>
+          <section className="scale-card"><h1>{state.loading ? "Loading…" : "Your practice library"}</h1>{!state.loading && <><p>Add your own chart or import song JSON to start practicing.</p><button className="play-button" onClick={actions.tryPracticeLoop}>Try a practice loop</button><button className="add-song" onClick={actions.findSong}>Add a song</button><p>On the public demo, songs stay in this browser. Export them to keep a backup.</p></>}</section>
         )}
       </main>
       {state.tune && <Transport state={state} actions={actions} />}{" "}

@@ -601,6 +601,13 @@ export function usePractice() {
   const actions = useMemo(
     () => ({
       loadTune,
+      tryPracticeLoop: async () => {
+        try {
+          const tune = parseSong({title:'Practice loop',key:'C',tempo:100,style:'swing',chart:'A: Dm7 | G7 | Cmaj7 | Cmaj7'});
+          await selectSavedSong(await saveCloudSong(tune));
+          setField('view','scales');
+        } catch(error) { update({error:error.message}); }
+      },
       retry: () =>
         stateRef.current.cloudError
           ? initialize()

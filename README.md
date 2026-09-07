@@ -4,6 +4,14 @@ A guitar practice app built with React and Web Audio: chord charts and voicings,
 
 **Bring your own music. This repository contains no song catalog, melody transcriptions, chart archives, or database exports.** It has a fresh history, separate from the original personal deployment. Imported music stays in ignored local directories; it is not part of the source repository.
 
+## Try it online
+
+**https://jazz-changes.pages.dev/**
+
+The public demo has no song catalog or shared database. Try a basic practice loop, or add/import your own music. Songs and settings stay in your browser's local storage; export songs before clearing browser data or changing devices. Files you import are not uploaded to a server.
+
+The public deployment uses `node scripts/build.mjs --public`, which always excludes local tune files and creates an empty catalog. Deploy that static output without the optional backend Functions or D1 bindings.
+
 ## Run locally
 
 Use Node.js 22 or newer.
