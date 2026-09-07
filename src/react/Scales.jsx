@@ -8,8 +8,10 @@ import {
 } from "../theory.js";
 import { renderFretboard } from "../fretboard.js";
 import { SvgMarkup } from "./SvgMarkup.jsx";
+import { Keyboard, NoteNames } from "./Keyboard.jsx";
 
 export function Scales({ state, actions }) {
+  const instrument = state.instrument || "guitar";
   const currentChord = state.playing ? state.playbackChord : state.chord,
     suggestion = suggestSection(state.tune, state.section),
     name = state.alt && suggestion.alt ? suggestion.alt : suggestion.primary;
@@ -35,6 +37,17 @@ export function Scales({ state, actions }) {
             pc === root ? "root" : chordPcs.includes(pc) ? "chord" : false,
         });
     }
+  const keyboardNotes = [];
+  for (let pitch = 48; pitch <= 71; pitch++) {
+    const pc = pitch % 12;
+    if (pcs.includes(pc) || chordPcs.includes(pc))
+      keyboardNotes.push({
+        pitch,
+        label: noteName(pc),
+        role:
+          pc === root ? "target" : chordPcs.includes(pc) ? "chord" : "passing",
+      });
+  }
   return (
     <>
       <div className="solo-mode">
@@ -88,21 +101,37 @@ export function Scales({ state, actions }) {
             Current chord <b>{currentChord}</b>
           </span>
         </div>
-        <div
-          className="full-neck"
-          tabIndex="0"
-          role="region"
-          aria-label="Scrollable fretboard"
-        >
-          <SvgMarkup
-            html={renderFretboard({
-              startFret: 0,
-              endFret: 15,
-              dots,
-              label: `${name} with ${currentChord} chord tones highlighted`,
-            })}
+        {instrument === "guitar" ? (
+          <div
+            className="full-neck"
+            tabIndex="0"
+            role="region"
+            aria-label="Scrollable fretboard"
+          >
+            <SvgMarkup
+              html={renderFretboard({
+                startFret: 0,
+                endFret: 15,
+                dots,
+                label: `${name} with ${currentChord} chord tones highlighted`,
+              })}
+            />
+          </div>
+        ) : instrument === "piano" ? (
+          <Keyboard
+            notes={keyboardNotes}
+            activePitch={state.activePitch}
+            onNote={(pitch) => actions.previewNotes([pitch])}
+            label={`${name} with ${currentChord} chord tones highlighted`}
           />
-        </div>
+        ) : (
+          <NoteNames
+            notes={keyboardNotes.filter((note) => note.pitch < 60)}
+            activePitch={state.activePitch}
+            onNote={(pitch) => actions.previewNotes([pitch])}
+            label={`${name} notes`}
+          />
+        )}
         <p className="legend">
           <span className="legend-dot root" />
           Chord root <span className="legend-dot chord" />

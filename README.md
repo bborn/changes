@@ -1,6 +1,6 @@
 # Changes
 
-A guitar practice app built with React and Web Audio: chord charts and voicings, a visual solo guide, generated practice phrases, melody tab, and standard notation.
+A practice app for guitar, piano, and other instruments, built with React and Web Audio: chord charts and voicings, a visual solo guide, generated practice phrases, melody tab, and standard notation.
 
 **Bring your own music. This repository contains no song catalog, melody transcriptions, chart archives, or database exports.** It has a fresh history, separate from the original personal deployment. Imported music stays in ignored local directories; it is not part of the source repository.
 
@@ -95,3 +95,13 @@ The small inline test fixtures are synthetic rhythm/harmony examples, not song t
 - `backend/`, `functions/`, `migrations/`: optional Cloudflare library backend.
 - `scripts/local-library.mjs`: standalone development library persistence.
 - `scripts/import-*.{mjs,py}`: import/conversion code; source data is not included.
+
+## Instrument views
+
+Choose **Settings → Instrument**:
+
+- **Guitar** keeps fretboards, chord shapes, and melody tab/notation.
+- **Piano** shows chord voicings and solo note choices on playable keyboards. Suggested phrases use a chromatic register rather than guitar positions; sounding solo notes highlight their keys.
+- **Other** shows note names and standard notation without guitar fingerings. Notes are in concert pitch; written-pitch transposition for instruments such as B♭ trumpet is not yet included.
+
+Piano and Other show melody and example phrases in treble-clef notation. The solo **Register** selector chooses C3–B4, C4–B5, or C5–B6. This is a visual and practice-range choice, not an automatic instrument-range check. Switching instruments stops playback so the new view and generated phrase start together; it does not change the song or its key. Your instrument choice is saved with your practice settings. Guitar's tab preference is retained when switching back.

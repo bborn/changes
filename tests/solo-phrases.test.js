@@ -152,3 +152,23 @@ test('neighboring cards share a composed sentence and a held pickup without retr
  assert.ok(Math.abs(continuation.duration-(held.beat+held.duration-ps[0].beats))<1e-7);
  assert.ok(ps[1].riff.at(-1).beat+ps[1].riff.at(-1).duration<ps[1].beats-.8);
 });
+
+test('piano and other phrases use chromatic registers independent of guitar frets',()=>{
+ const tune={key:'C',style:'bossa',timeSignature:'4/4',form:['A'],sections:{A:{bars:[['Cmaj7'],['Dm7'],['G7'],['Cmaj7']]}}};
+ for(const instrument of ['piano','other'])for(const [register,base] of Object.entries({low:48,middle:60,high:72})){
+  const options={instrument,register,level:'advanced'};
+  const phrases=buildSoloPhrases(tune,1,options);
+  assert.deepEqual(phrases,buildSoloPhrases(tune,12,options));
+  assert.ok(phrases.some(p=>p.riff.length));
+  for(const phrase of phrases){
+   for(const n of [...phrase.dots,...phrase.riff]){assert.ok(n.pitch>=base&&n.pitch<base+24);assert.equal(n.string,undefined);assert.equal(n.fret,undefined);}
+   for(const e of phrase.events)assert.ok(chordPitchClasses(e.chord).includes(e.target.pitch%12));
+  }
+ }
+});
+
+test('guide-note spelling wraps seven letter names without spurious accidentals',()=>{
+ const tune={key:'Bb',style:'swing',timeSignature:'4/4',form:['A'],sections:{A:{bars:[['Bbmaj7'],['Ebmaj7']]}}};
+ const phrases=buildSoloPhrases(tune,3);
+ assert.ok(phrases.flatMap(p=>p.dots).every(n=>!n.label.includes('bbb')&&!n.label.includes('###')));
+});

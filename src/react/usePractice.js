@@ -23,6 +23,8 @@ import {
 
 const SESSION_KEY = "pocket-session";
 const SIDEBAR_KEY = "changes-sidebar-collapsed";
+const INSTRUMENTS = ["guitar", "piano", "other"];
+const SOLO_REGISTERS = ["low", "middle", "high"];
 const SOLO_LEVELS = ["beginner", "intermediate", "advanced"];
 const MELODY_MODES = ["tab", "both", "notes"];
 const INVERSIONS = ["auto", "0", "1", "2", "3"];
@@ -44,6 +46,8 @@ function initialState() {
   } catch {}
   return {
     sidebarCollapsed,
+    instrument: INSTRUMENTS.includes(saved.instrument) ? saved.instrument : "guitar",
+    soloRegister: SOLO_REGISTERS.includes(saved.soloRegister) ? saved.soloRegister : "middle",
     melodyMode: MELODY_MODES.includes(saved.melodyMode)
       ? saved.melodyMode
       : "tab",
@@ -102,6 +106,8 @@ function initialState() {
 }
 
 const persistentSettings = (state) => ({
+  instrument: state.instrument,
+  soloRegister: state.soloRegister,
   soloLevel: state.soloLevel,
   melodyMode: state.melodyMode,
   slug: state.tune?.slug,
@@ -160,9 +166,11 @@ export function usePractice() {
         ? buildSoloPhrases(state.tune, state.soloStart, {
             loop: state.loop,
             level: state.soloLevel,
+            instrument: state.instrument,
+            register: state.soloRegister,
           })
         : [],
-    [state.tune, state.soloStart, state.loop, state.soloLevel],
+    [state.tune, state.soloStart, state.loop, state.soloLevel, state.instrument, state.soloRegister],
   );
 
   useEffect(() => {
@@ -267,6 +275,8 @@ export function usePractice() {
               .filter((value) => typeof value === "string")
               .slice(0, 8)
           : [],
+        ...(INSTRUMENTS.includes(restored.instrument) ? { instrument: restored.instrument } : {}),
+        ...(SOLO_REGISTERS.includes(restored.soloRegister) ? { soloRegister: restored.soloRegister } : {}),
         ...(SHAPE_ZONES.includes(restored.shapeZone)
           ? { shapeZone: restored.shapeZone }
           : {}),
@@ -328,6 +338,8 @@ export function usePractice() {
     state.inversion,
     state.melodyMode,
     state.soloLevel,
+    state.instrument,
+    state.soloRegister,
     state.recent,
   ]);
 
@@ -419,6 +431,8 @@ export function usePractice() {
           buildSoloPhrases(current.tune, current.soloStart, {
             loop: current.loop,
             level: current.soloLevel,
+            instrument: current.instrument,
+            register: current.soloRegister,
           }),
         );
         if (resuming) await engine.resume();
@@ -693,6 +707,13 @@ export function usePractice() {
           alt: false,
         }));
       },
+      setInstrument: (value) => {
+        if (!INSTRUMENTS.includes(value)) return;
+        ++playId.current;
+        engine.stop();
+        update(current => ({ ...current, instrument: value, playing: false, paused: false, starting: false, soloPage: null }));
+      },
+      setSoloRegister: (value) => { if (SOLO_REGISTERS.includes(value)) setField("soloRegister", value); },
       setSoloMode: (value) => setField("soloMode", value),
       setSoloLevel: (value) => setField("soloLevel", value),
       setSoloStart: (value) => setField("soloStart", Number(value)),

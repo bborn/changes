@@ -85,12 +85,14 @@ export function Chart({ state, actions }) {
                                   openSheet: true,
                                 })
                               }
-                              aria-label={`Show ${chord} voicings`}
+                              aria-label={`Show ${chord} ${(state.instrument || "guitar") === "guitar" ? "voicings" : "notes"}`}
                             >
                               <span className="chart-chord-name">{chord}</span>
-                              <SvgMarkup
-                                html={tinyShape(plan[location]?.shape)}
-                              />
+                              {(state.instrument || "guitar") === "guitar" && (
+                                <SvgMarkup
+                                  html={tinyShape(plan[location]?.shape)}
+                                />
+                              )}
                             </button>
                           );
                         })}

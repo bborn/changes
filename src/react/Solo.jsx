@@ -1,9 +1,33 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { buildSoloPhrases } from "../solo-phrases.js";
 import { SvgMarkup } from "./SvgMarkup.jsx";
+import { Keyboard, NoteNames } from "./Keyboard.jsx";
+import { PhraseNotation } from "./PhraseNotation.jsx";
 
 const strings = ["", "high E", "B", "G", "D", "A", "low E"];
 const range = (phrase) => phrase.bars.map((bar) => bar.number).join("–");
+const pitchLabel = (pitch) =>
+  `${["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"][(pitch % 12 + 12) % 12]}${Math.floor(pitch / 12) - 1}`;
+function phraseKeyboardNotes(phrase, next) {
+  const byPitch = new Map();
+  const add = (note, fallbackRole) => {
+    if (!note) return;
+    if (byPitch.has(note.pitch)) {
+      if (fallbackRole === "next") byPitch.get(note.pitch).next = true;
+      return;
+    }
+    byPitch.set(note.pitch, {
+      pitch: note.pitch,
+      label: `${note.label || pitchLabel(note.pitch).replace(/-?\d+$/, "")}${Math.floor(note.pitch / 12) - 1}`,
+      role: note.role === "common" ? "chord" : note.role || fallbackRole,
+      next: fallbackRole === "next",
+    });
+  };
+  phrase.dots.forEach((note) => add(note, "chord"));
+  phrase.riff.forEach((note) => add(note, "passing"));
+  add(next?.events[0]?.target, "next");
+  return [...byPitch.values()].sort((a, b) => a.pitch - b.pitch);
+}
 const esc = (value) =>
   String(value ?? "").replace(
     /[&<>"']/g,
@@ -80,12 +104,17 @@ function riffMeasure(notes, beats) {
 }
 
 export function Solo({ state, actions, engine }) {
+  const instrument = state.instrument || "guitar";
+  const guitar = instrument === "guitar";
+  const [sounding, setSounding] = useState(null);
   const phrases = useMemo(
     () =>
       state.soloPhrases ||
       buildSoloPhrases(state.tune, state.soloStart, {
         loop: state.loop,
         level: state.soloLevel,
+        instrument,
+        register: state.soloRegister,
       }),
     [
       state.soloPhrases,
@@ -93,6 +122,8 @@ export function Solo({ state, actions, engine }) {
       state.soloStart,
       state.loop,
       state.soloLevel,
+      instrument,
+      state.soloRegister,
     ],
   );
   const root = useRef(null),
@@ -190,6 +221,7 @@ export function Solo({ state, actions, engine }) {
   useEffect(() => {
     const light = () => {
       const note = engine.activeSoloNote;
+      setSounding(note || null);
       root.current?.querySelectorAll("[data-solo-position]").forEach((dot) => {
         const on = Boolean(
           note &&
@@ -245,17 +277,29 @@ export function Solo({ state, actions, engine }) {
             All notes
           </button>
         </div>
-        <select
-          aria-label="Solo fret position"
-          value={state.soloStart}
-          onChange={(e) => actions.setSoloStart(Number(e.target.value))}
-        >
-          {[1, 3, 5, 7, 9, 12].map((f) => (
-            <option value={f} key={f}>
-              Frets {f}–{f + 3}
-            </option>
-          ))}
-        </select>
+        {guitar ? (
+          <select
+            aria-label="Solo fret position"
+            value={state.soloStart}
+            onChange={(e) => actions.setSoloStart(Number(e.target.value))}
+          >
+            {[1, 3, 5, 7, 9, 12].map((f) => (
+              <option value={f} key={f}>
+                Frets {f}–{f + 3}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <select
+            aria-label="Solo register"
+            value={state.soloRegister || "middle"}
+            onChange={(e) => actions.setSoloRegister(e.target.value)}
+          >
+            <option value="low">Low</option>
+            <option value="middle">Middle</option>
+            <option value="high">High</option>
+          </select>
+        )}
       </div>
       <label className="solo-difficulty">
         <span>
@@ -412,11 +456,27 @@ export function Solo({ state, actions, engine }) {
                     );
                   })}
                 </div>
-                <SvgMarkup
-                  html={neck(phrase, state.soloStart, next?.events[0]?.target)}
-                  onClick={noteEvent}
-                  onKeyDown={keyEvent}
-                />
+                {guitar ? (
+                  <SvgMarkup
+                    html={neck(phrase, state.soloStart, next?.events[0]?.target)}
+                    onClick={noteEvent}
+                    onKeyDown={keyEvent}
+                  />
+                ) : instrument === "piano" ? (
+                  <Keyboard
+                    notes={phraseKeyboardNotes(phrase, next)}
+                    activePitch={sounding?.phraseId === phrase.id ? sounding.pitch : null}
+                    onNote={(pitch) => actions.previewNotes([pitch])}
+                    label={`Notes for bars ${range(phrase)}`}
+                  />
+                ) : (
+                  <NoteNames
+                    notes={phraseKeyboardNotes(phrase, next)}
+                    activePitch={sounding?.phraseId === phrase.id ? sounding.pitch : null}
+                    onNote={(pitch) => actions.previewNotes([pitch])}
+                    label={`Notes for bars ${range(phrase)}`}
+                  />
+                )}
                 <div className="phrase-legend">
                   <span>
                     <i className="target-key" /> Land
@@ -445,8 +505,17 @@ export function Solo({ state, actions, engine }) {
                             n.beat + n.duration > bar * beats && n.beat < (bar + 1) * beats,
                         )
                         .map((n) => ({ ...n, tie: n.tie || n.beat < bar * beats, beat: Math.max(0,n.beat - bar * beats), duration: Math.min(n.beat+n.duration,(bar+1)*beats)-Math.max(n.beat,bar*beats) }));
-                    return (
+                    return guitar ? (
                       <SvgMarkup html={riffMeasure(notes, beats)} key={bar} />
+                    ) : (
+                      <PhraseNotation
+                        phrase={phrase}
+                        bar={bar}
+                          tune={state.tune}
+                          showSwing={bar === 0}
+                        onPreview={actions.previewNotes}
+                        key={bar}
+                      />
                     );
                   })}
                   <div>

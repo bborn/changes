@@ -204,7 +204,7 @@ function Header({ state, actions }) {
           {VIEWS.map(([view, label, aria]) => (
             <button
               key={view}
-              aria-label={aria}
+              aria-label={view === "voicings" && state.instrument && state.instrument !== "guitar" ? "Chords" : aria}
               aria-pressed={state.view === view}
               className={state.view === view ? "active" : ""}
               onClick={() => actions.setView(view)}
@@ -252,6 +252,14 @@ function Settings({ state, actions }) {
           ×
         </button>
       </header>
+      <label className="instrument-setting">
+        Instrument
+        <select aria-label="Instrument" value={state.instrument || "guitar"} onChange={e => actions.setInstrument(e.target.value)}>
+          <option value="guitar">Guitar</option>
+          <option value="piano">Piano</option>
+          <option value="other">Other · concert pitch</option>
+        </select>
+      </label>
       <div className="mixer-tracks">
         {Object.entries(state.tracks).map(([name, track]) => (
           <div className="mixer-track" key={name}>
@@ -301,7 +309,7 @@ function Transport({ state, actions }) {
             : "Play";
   return (
     <div className="transport" inert={state.sheet}>
-      {["chart", "voicings"].includes(state.view) && (
+      {(!state.instrument || state.instrument === "guitar") && ["chart", "voicings"].includes(state.view) && (
         <div className="mini-reminder">
           <label className="shape-position">
             Position{" "}
