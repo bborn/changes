@@ -479,14 +479,7 @@ export function Solo({ state, actions, engine }) {
                     onClick={noteEvent}
                     onKeyDown={keyEvent}
                   />
-                ) : instrument === "piano" ? (
-                  <Keyboard
-                    notes={phraseKeyboardNotes(phrase, next)}
-                    activePitch={sounding?.phraseId === phrase.id ? sounding.pitch : null}
-                    onNote={(pitch) => actions.previewNotes([pitch])}
-                    label={`Notes for bars ${range(phrase)}`}
-                  />
-                ) : (
+                ) : instrument === "piano" ? null : (
                   <NoteNames
                     notes={phraseKeyboardNotes(phrase, next)}
                     activePitch={sounding?.phraseId === phrase.id ? sounding.pitch : null}
@@ -494,7 +487,7 @@ export function Solo({ state, actions, engine }) {
                     label={`Notes for bars ${range(phrase)}`}
                   />
                 )}
-                <div className="phrase-legend">
+                <div className="phrase-legend" hidden={instrument === "piano"}>
                   <span>
                     <i className="target-key" /> Land
                   </span>
@@ -546,6 +539,22 @@ export function Solo({ state, actions, engine }) {
           })}
         </div>
       </div>
+      {instrument === "piano" && chosen && (
+        <div className="solo-keyboard-reference">
+          <Keyboard
+            notes={phraseKeyboardNotes(chosen, phrases[(phrases.indexOf(chosen) + 1) % phrases.length])}
+            activePitch={sounding?.phraseId === chosen.id ? sounding.pitch : null}
+            onNote={(pitch) => actions.previewNotes([pitch])}
+            label="Solo piano keyboard"
+          />
+          <div className="phrase-legend">
+            <span><i className="target-key" /> Land</span>
+            <span><i className="common-key" /> Shared</span>
+            <span><i className="passing-key" /> Passing</span>
+            <span><i className="next-key" /> Next</span>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

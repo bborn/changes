@@ -107,3 +107,25 @@ button{transition:scale 180ms cubic-bezier(.2,.8,.3,1),background-color 160ms,co
  .piano-solo .phrase-page{padding:8px}
  .piano-solo .phrase-chord-strip{margin-bottom:0}
 }
+
+/* A keyboard is one fixed reference, never a nested scrolling surface. */
+.keyboard{overflow:visible}
+.keyboard .piano-key.white{flex:1 1 0;min-width:0}
+.keyboard .piano-key.black{flex:0 0 calc(62% / var(--white-keys));min-width:0;margin-left:calc(-31% / var(--white-keys));margin-right:calc(-31% / var(--white-keys))}
+.keyboard .piano-key span{font-size:clamp(9px,2.7vw,12px);white-space:nowrap}
+
+.piano-solo .phrase-page .phrase-legend{display:none}
+.solo-keyboard-reference{max-width:760px;padding:0 12px 12px;background:#faf9f3;border:1px solid var(--line);border-radius:8px;margin-top:8px}
+/* Preserve the familiar white/black key pattern; guidance lives on note markers. */
+.keyboard{border-top:7px solid #252b28;border-radius:3px 3px 5px 5px;isolation:isolate}
+.keyboard .piano-key.white{background:linear-gradient(#fff 0%,#fff 85%,#eeeee8 100%);color:#263d33;border:1px solid #aaa;border-top:0;box-shadow:inset 0 -3px 0 #d9dad4}
+.keyboard .piano-key.black{background:linear-gradient(90deg,#171c19,#343a36 45%,#171c19);color:white;border:1px solid #111;border-top:0;box-shadow:inset 0 -4px 0 #080b09,1px 2px 2px #0005;border-radius:0 0 3px 3px}
+.keyboard .piano-key span{bottom:9px;display:flex;align-items:center;justify-content:center;min-width:18px;min-height:20px;padding:2px;border-radius:4px;font-weight:600;background:#dce2ce;color:#263d33;line-height:1}
+.keyboard .piano-key.target span{background:#b84928;color:white}
+.keyboard .piano-key.chord span{background:#263d33;color:white}
+.keyboard .piano-key.passing span{border:1px dashed #839172;background:#edf0e5}
+.keyboard .piano-key.next{outline:none}
+.keyboard .piano-key.next span{outline:2px solid #b84928;outline-offset:2px}
+.keyboard .piano-key.active{box-shadow:inset 0 -3px 0 #d9dad4}
+.keyboard .piano-key.active span{background:#f5ce58;color:#182d24;outline:2px solid #263d33;outline-offset:1px}
+.keyboard,.piano-solo .keyboard,.piano-voicings .keyboard{height:auto;aspect-ratio:var(--white-keys) / 6.3}

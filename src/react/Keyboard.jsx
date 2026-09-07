@@ -26,7 +26,8 @@ export function Keyboard({
   );
 
   return (
-    <div className="keyboard" role="group" aria-label={label}>
+    <div className="keyboard" role="group" aria-label={label}
+      style={{ "--white-keys": keys.filter((pitch) => !BLACK_KEYS.has(mod12(pitch))).length }}>
       {keys.map((pitch) => {
         const note = byPitch.get(pitch);
         const black = BLACK_KEYS.has(mod12(pitch));
@@ -45,7 +46,7 @@ export function Keyboard({
             }
             aria-pressed={activePitch === pitch}
           >
-            {note && <span>{note.label || noteName(pitch)}</span>}
+            {note && <span>{black ? (note.label || noteName(pitch)).replace(/-?\d+$/, "") : note.label || noteName(pitch)}</span>}
           </button>
         );
       })}
