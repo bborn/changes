@@ -20,7 +20,9 @@ export function parseChord(symbol) {
   if(symbol==='N.C.')return {root:'C',rootPc:0,quality:'rest',extensions:[],bass:null};
   const match = /^([A-G][#b]?)([^/]*)(?:\/([A-G][#b]?))?$/.exec(symbol.trim().replaceAll('♭','b').replaceAll('♯','#'));
   if (!match) throw new Error(`Unsupported chord: ${symbol}`);
-  const suffix = match[2];
+  // Parentheses group alterations; normalize before matching m7b5 so its
+  // half-diminished quality and voicing templates remain identical.
+  const suffix = match[2].replace(/\(((?:add9|add3|b13|#11|b9|#9|b5|#5|alt)(?:,?(?:add9|add3|b13|#11|b9|#9|b5|#5|alt))*)\)/g, (_, alterations) => alterations.replaceAll(',', ''));
   const qualityMatch = /^(m7b5|mMaj9|mMaj7|dimMaj7|maj13|maj9|maj7|m13|m11|m9|m7|m6|mb6|dim7|dim|aug7|aug|13sus4|9sus4|7sus4|sus4|sus2|maj|m|13|11|9|7|6|5|alt)?/.exec(suffix);
   let quality = qualityMatch[0] || 'maj';
   let rest = suffix.slice(qualityMatch[0].length);

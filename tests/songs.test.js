@@ -11,6 +11,13 @@ test('editor song roundtrips with split bars, section order and unicode notes',(
  assert.deepEqual(parseSong({...fields,form:''}).form,['A','B']);
  assert.equal(parseSong({...fields,chart:'A: | C7 | G7 |\nB: Dm7 G7 Cmaj7 A7'}).sections.B.bars[0].length,4);
 });
+test('parenthesized chords survive saving and reopening an entered chart',()=>{
+ const song=parseSong({...fields,chart:fields.chart.replace('Am7b5','Am7(b5)')});
+ const store=storage();
+ saveSong(song,store);
+ assert.deepEqual(readSongs(store),[song]);
+ assert.deepEqual(parseSong(serializeSong(song),song.slug),song);
+});
 test('chart errors identify exact section/bar and reject empty or duplicate sections',()=>{
  assert.throws(()=>parseSong({...fields,chart:'A: Cm7 | Nope\nB: F7'}),/Section A, bar 2: unsupported chord/);
  assert.throws(()=>parseSong({...fields,form:'A Z'}),/unknown section “Z”/);

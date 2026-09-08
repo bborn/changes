@@ -11,6 +11,14 @@ test('parses the complete handoff grammar, accidentals and slash bass',()=>{
   assert.deepEqual(parseChord('F#13').extensions,['13']);
   for(const invalid of ['H7','Cwhat','C7/','Cmaj7nope','']) assert.throws(()=>parseChord(invalid));
 });
+test('parenthesized alterations match bare notation without accepting malformed groups',()=>{
+ for(const [symbol,bare] of [['Am7(b5)','Am7b5'],['D7(b9)','D7b9'],['C7(b9,#11)/E','C7b9#11/E'],['Am7(♭5)','Am7b5']]) {
+  assert.deepEqual(parseChord(symbol),parseChord(bare));
+  assert.deepEqual(chordPitchClasses(symbol),chordPitchClasses(bare));
+  assert.deepEqual(getVoicings(symbol),getVoicings(bare));
+ }
+ for(const symbol of ['Am7(b5','Am7b5)','Am7((b5))','Am7()','Am7(nope)','C7(b9,)']) assert.throws(()=>parseChord(symbol));
+});
 test('chord tones preserve altered fifth and diminished seventh',()=>{
  assert.deepEqual(chordPitchClasses('Cm7b5'),[0,3,6,10]);
  assert.deepEqual(chordPitchClasses('Cdim7'),[0,3,6,9]);
