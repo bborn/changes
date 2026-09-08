@@ -13,7 +13,7 @@ import { openSongEditor } from "../song-editor.js";
 import { parseSong, readSongs } from "../songs.js";
 import { transposeTune } from "../transpose.js";
 import { planShapes, chooseShape } from "../voice-leading.js";
-import { buildSoloPhrases } from "../solo-phrases.js";
+import { buildSoloPhrases, SOLO_PHRASING_STYLES } from "../solo-phrases.js";
 import { getVoicings } from "../theory.js";
 import {
   chooseInitialTune,
@@ -66,6 +66,7 @@ function initialState() {
     soloLevel: SOLO_LEVELS.includes(saved.soloLevel)
       ? saved.soloLevel
       : "intermediate",
+    soloPhrasing: SOLO_PHRASING_STYLES.includes(saved.soloPhrasing) ? saved.soloPhrasing : "varied",
     soloStart: 5,
     soloFollow: true,
     soloPage: null,
@@ -109,6 +110,7 @@ const persistentSettings = (state) => ({
   instrument: state.instrument,
   soloRegister: state.soloRegister,
   soloLevel: state.soloLevel,
+  soloPhrasing: state.soloPhrasing,
   melodyMode: state.melodyMode,
   slug: state.tune?.slug,
   tempo: state.tempo,
@@ -166,11 +168,12 @@ export function usePractice() {
         ? buildSoloPhrases(state.tune, state.soloStart, {
             loop: state.loop,
             level: state.soloLevel,
+            phrasing: state.soloPhrasing,
             instrument: state.instrument,
             register: state.soloRegister,
           })
         : [],
-    [state.tune, state.soloStart, state.loop, state.soloLevel, state.instrument, state.soloRegister],
+    [state.tune, state.soloStart, state.loop, state.soloLevel, state.soloPhrasing, state.instrument, state.soloRegister],
   );
 
   useEffect(() => {
@@ -286,6 +289,7 @@ export function usePractice() {
         ...(MELODY_MODES.includes(restored.melodyMode)
           ? { melodyMode: restored.melodyMode }
           : {}),
+        ...(SOLO_PHRASING_STYLES.includes(restored.soloPhrasing) ? { soloPhrasing: restored.soloPhrasing } : {}),
         ...(SOLO_LEVELS.includes(restored.soloLevel)
           ? { soloLevel: restored.soloLevel }
           : {}),
@@ -338,6 +342,7 @@ export function usePractice() {
     state.inversion,
     state.melodyMode,
     state.soloLevel,
+    state.soloPhrasing,
     state.instrument,
     state.soloRegister,
     state.recent,
@@ -431,6 +436,7 @@ export function usePractice() {
           buildSoloPhrases(current.tune, current.soloStart, {
             loop: current.loop,
             level: current.soloLevel,
+            phrasing: current.soloPhrasing,
             instrument: current.instrument,
             register: current.soloRegister,
           }),
@@ -715,6 +721,12 @@ export function usePractice() {
       },
       setSoloRegister: (value) => { if (SOLO_REGISTERS.includes(value)) setField("soloRegister", value); },
       setSoloMode: (value) => setField("soloMode", value),
+      setSoloPhrasing: (value) => {
+        if (!SOLO_PHRASING_STYLES.includes(value) || value === stateRef.current.soloPhrasing) return;
+        ++playId.current;
+        engine.stop();
+        update(current => ({ ...current, soloPhrasing: value, playing: false, paused: false, starting: false, soloPage: null }));
+      },
       setSoloLevel: (value) => setField("soloLevel", value),
       setSoloStart: (value) => setField("soloStart", Number(value)),
       setSoloFollow: (value) => setField("soloFollow", Boolean(value)),

@@ -132,3 +132,5 @@ button{transition:scale 180ms cubic-bezier(.2,.8,.3,1),background-color 160ms,co
 .musical-typing-control{margin:0 0 20px}.musical-typing-control label{display:flex;align-items:center;gap:8px;min-height:44px}.musical-typing-control small{display:block;color:var(--muted)}
 .piano-key kbd{position:absolute;left:50%;bottom:38px;transform:translateX(-50%);font:11px Arial;color:inherit;pointer-events:none}
 .riff-articulation path{stroke:var(--accent);stroke-width:1.2}.riff-articulation text{font:bold 8px Arial;fill:var(--accent)}.riff-double-stop line{stroke:var(--accent);stroke-width:1.2}
+
+.solo-composition-controls{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:16px}.solo-phrasing{display:flex;align-items:center;gap:10px}.solo-composition-controls .solo-difficulty{margin:0;flex:1;min-width:240px}.solo-phrasing select{min-height:40px}

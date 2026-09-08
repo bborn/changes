@@ -129,6 +129,7 @@ export function Solo({ state, actions, engine }) {
       buildSoloPhrases(state.tune, state.soloStart, {
         loop: state.loop,
         level: state.soloLevel,
+        phrasing: state.soloPhrasing,
         instrument,
         register: state.soloRegister,
       }),
@@ -138,6 +139,7 @@ export function Solo({ state, actions, engine }) {
       state.soloStart,
       state.loop,
       state.soloLevel,
+      state.soloPhrasing,
       instrument,
       state.soloRegister,
     ],
@@ -334,28 +336,38 @@ export function Solo({ state, actions, engine }) {
           </select>
         )}
       </div>
-      <label className="solo-difficulty">
-        <span>
-          {state.soloLevel[0].toUpperCase() + state.soloLevel.slice(1)}
-        </span>
-        <input
-          type="range"
-          min="0"
-          max="2"
-          step="1"
-          value={Math.max(
-            0,
-            ["beginner", "intermediate", "advanced"].indexOf(state.soloLevel),
-          )}
-          aria-label="Solo difficulty"
-          aria-valuetext={state.soloLevel}
-          onChange={(e) =>
-            actions.setSoloLevel(
-              ["beginner", "intermediate", "advanced"][Number(e.target.value)],
-            )
-          }
-        />
-      </label>
+      <div className="solo-composition-controls">
+        <label className="solo-phrasing">
+          <span>Phrasing</span>
+          <select aria-label="Solo phrasing" value={state.soloPhrasing || "varied"} onChange={e => actions.setSoloPhrasing(e.target.value)}>
+            <option value="varied">Varied</option>
+            <option value="motivic">Motif development</option>
+            <option value="lyrical">Lyrical</option>
+          </select>
+        </label>
+        <label className="solo-difficulty">
+          <span>
+            {state.soloLevel[0].toUpperCase() + state.soloLevel.slice(1)}
+          </span>
+          <input
+            type="range"
+            min="0"
+            max="2"
+            step="1"
+            value={Math.max(
+              0,
+              ["beginner", "intermediate", "advanced"].indexOf(state.soloLevel),
+            )}
+            aria-label="Solo difficulty"
+            aria-valuetext={state.soloLevel}
+            onChange={(e) =>
+              actions.setSoloLevel(
+                ["beginner", "intermediate", "advanced"][Number(e.target.value)],
+              )
+            }
+          />
+        </label>
+      </div>
       <div className="phrase-navigation">
         <div>
           <button

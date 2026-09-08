@@ -8,6 +8,7 @@ const positionKey=n=>n.string==null?`pitch-${n.pitch}`:`${n.string}-${n.fret}`;
 const stringDistance=(a,b)=>a.string==null||b.string==null?0:Math.abs(a.string-b.string);
 const melodicPosition=n=>n.string==null||n.string<=4;
 const stableHash=value=>[...value].reduce((hash,char)=>(hash*31+char.charCodeAt(0))>>>0,2166136261);
+export const SOLO_PHRASING_STYLES=['varied','motivic','lyrical'];
 const LETTERS='CDEFGAB',NATURAL={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
 function targetLabel(note,chord){
  const interval=mod12(note.pc-chord.rootPc),steps=[3,4].includes(interval)?2:[10,11].includes(interval)?6:null;
@@ -73,7 +74,54 @@ function phraseDots(events,board,targets){
  return [...byPosition.values()].sort((a,b)=>(a.string??0)-(b.string??0)||a.pitch-b.pitch);
 }
 
-function practiceRiff(events,beats,board,{style,beatsPerBar,variant=0,level='intermediate'}={}){
+function styledStarts(beats,{style,beatsPerBar,variant,level,phrasing}){
+ const swing=style==='swing',beginner=level==='beginner',unit=beginner?1:.5;
+ const library=beginner?[[0,1,2],[0,1,3],[0,2,3]]:phrasing==='lyrical'?[
+  [0,1.5,3],[0,2,3.5],[0,1,3],
+ ]:level==='advanced'?[
+  [0,.5,1,1.5,2.5],[0,.5,1.5,2,3],[0,1,1.5,2.5],
+ ]:[[0,.5,1.5,2.5],[0,1,1.5,3],[0,.5,2,2.5]];
+ let seed=(variant+1)*2654435761+(phrasing==='lyrical'?7919:2971);
+ const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/2**32;};
+ let cursor=beginner?variant%2:variant%3*.5,motif=library[Math.floor(random()*library.length)],uses=0;
+ let development=random()<.5?['augmentation','extension']:['extension','augmentation'],embellished=false;
+ const raw=[];
+ while(cursor<beats-1e-7){
+  let operation;
+  if(uses===0)operation='statement';
+  else if(uses===1)operation='displacement';
+  else operation=uses===2?development[0]:uses===3?development[1]:'truncation';
+  let offsets=[...motif],gesture=phrasing==='lyrical'?'sustain':'motif';
+  if(operation==='augmentation'){offsets=offsets.map(beat=>beat*2);gesture='sustain';}
+  if(operation==='truncation')offsets=offsets.slice(0,Math.max(1,offsets.length-1));
+  if(operation==='extension'){
+   const end=offsets.at(-1),next=Math.ceil((end+unit)/unit)*unit;
+   offsets.push(next,next+unit);
+   // One displaced triplet flourish can extend a developed advanced motif.
+   if(level==='advanced'&&!embellished){const triplet=Math.ceil(next);offsets.push(triplet+1/3,triplet+2/3);embellished=true;}
+   offsets.sort((a,b)=>a-b);
+  }
+  for(const [motifIndex,offset] of offsets.entries()){
+   const writtenBeat=cursor+offset;if(writtenBeat>=beats-1e-7)continue;
+   const fraction=writtenBeat-Math.floor(writtenBeat);
+   const beat=swing&&Math.abs(fraction-.5)<1e-7?Math.floor(writtenBeat)+2/3:writtenBeat;
+   raw.push({beat,writtenBeat,motifIndex,bar:Math.floor(writtenBeat/beatsPerBar),gesture});
+  }
+  // A triplet extension colors this phrase only. Quantize the following cursor
+  // back to the style's base pulse so the flourish cannot shift every later idea.
+  const phraseLength=Math.ceil((offsets.at(-1)+unit-1e-7)/unit)*unit;
+  const breath=beginner?1+Math.floor(random()*2):phrasing==='lyrical'?1.5+Math.floor(random()*4)*.5:.5+Math.floor(random()*3)*.5;
+  cursor+=phraseLength+breath+(operation==='displacement'?unit:0);
+  uses++;
+  if(uses>=5){
+   const alternatives=library.filter(candidate=>candidate!==motif);motif=alternatives[Math.floor(random()*alternatives.length)];
+   uses=0;development=random()<.5?['augmentation','extension']:['extension','augmentation'];
+  }
+ }
+ return [...new Map(raw.sort((a,b)=>a.beat-b.beat).map(start=>[start.writtenBeat.toFixed(7),start])).values()];
+}
+
+function practiceRiff(events,beats,board,{style,beatsPerBar,variant=0,level='intermediate',phrasing='varied'}={}){
  const sounding=events.filter(e=>e.target);if(!sounding.length)return [];
  // An eight-bar sentence: state, echo, develop, then answer and breathe.
  // Plan the silence first; chord changes must not fill it back in.
@@ -90,8 +138,8 @@ function practiceRiff(events,beats,board,{style,beatsPerBar,variant=0,level='int
   [0,.5,1,2,3],[.5,1,2,2.5,3.5],[0,1,1.5,2.5,3],
   [0,.5,1.5,2,3.5],[1,1.5,2.5,3],[0,.5,1,2,2.5,3.5],
  ];
- const swing=style==='swing',starts=[];let previousConnects=false;
- for(let bar=0;bar<Math.ceil(beats/beatsPerBar);bar++){
+ const swing=style==='swing',starts=phrasing==='varied'?[]:styledStarts(beats,{style,beatsPerBar,variant,level,phrasing});let previousConnects=false;
+ if(phrasing==='varied')for(let bar=0;bar<Math.ceil(beats/beatsPerBar);bar++){
   const patternIndex=(bar*5+variant*3+family)%patterns.length;
   let motif=[...patterns[patternIndex]].filter(beat=>beat<beatsPerBar);
   const sparseStatement=motif.length<=2;
@@ -208,7 +256,7 @@ function addGuitarTechniques(notes,events,board,{level,variant}){
 }
 
 /** Build stable two-bar practice phrases. Pairs never cross a form-section boundary. */
-export function buildSoloPhrases(tune,startFret=5,{loop=null,level='intermediate',instrument='guitar',register='middle'}={}){
+export function buildSoloPhrases(tune,startFret=5,{loop=null,level='intermediate',instrument='guitar',register='middle',phrasing='varied'}={}){
  const base={low:48,middle:60,high:72}[register]??60;
  const board=instrument==='guitar'?positions(startFret):Array.from({length:24},(_,i)=>({pitch:base+i,pc:mod12(base+i),label:noteName(base+i)})),beatsPerBar=Number(tune.timeSignature.split('/')[0])||4,phrases=[];
  let absoluteBar=0,previousTarget=null;
@@ -237,7 +285,7 @@ export function buildSoloPhrases(tune,startFret=5,{loop=null,level='intermediate
   const sentence=Math.floor(first/2);
   const identity=events.map(event=>`${event.formIndex}:${event.barIndex}:${event.chord}`).join('|');
   const variant=(sentence+stableHash(identity))%12;
-  const line=practiceRiff(events,total,board,{style:tune.style,beatsPerBar,level,variant});
+  const line=practiceRiff(events,total,board,{style:tune.style,beatsPerBar,level,variant,phrasing:SOLO_PHRASING_STYLES.includes(phrasing)?phrasing:'varied'});
   group.forEach((p,i)=>{
    const offset=offsets[i];p.sentence=sentence;p.sentenceEnd=i===group.length-1;
    p.riff=line.filter(n=>n.beat<offset+p.beats&&n.beat+n.duration>offset).map(n=>{

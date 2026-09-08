@@ -34,3 +34,15 @@ Guitar examples add feasible same-string hammer-ons, pull-offs and slides, plus 
 [Berklee: Got Rhythm?](https://college.berklee.edu/bt/193/lesson.html) informed the varied phrase lengths and movement across bar lines.
 
 The contrast between sustained statements and dense runs follows [Hal Crook’s Berklee discussion of continuity and rhythmic balance](https://www.berklee.edu/berklee-today/spring-2007/the-woodshed/musical-freedom), alongside [Jazzadvice’s guidance on longer lines](https://www.jazzadvice.com/lessons/playing-longer-lines-in-your-solos/). These guide the local heuristic; they are not a guarantee of human-level composition.
+
+## Phrasing choices
+
+The Solo view has an independent **Phrasing** picker:
+
+- **Varied** preserves the existing generator for comparison.
+- **Motif development** starts from a short rhythmic idea and develops it with repetition, displacement, longer durations, extensions, and shorter answers.
+- **Lyrical** favors sustained ideas and space using the same transformation approach.
+
+Difficulty still controls rhythmic complexity and guitar techniques. The selection is saved with practice settings. Changing phrasing stops playback and previews so the next Play starts the displayed example from the beginning. Examples are deterministic for the same song and settings.
+
+The new modes draw on the outline-and-transformation approach in [Putman and Keller, A Transformational Grammar Framework for Improvisation (2015)](https://www.researchgate.net/publication/304784795_A_Transformational_Grammar_Framework_for_Improvisation). The implementation uses original rhythm rules, not copied solo transcriptions or a trained corpus. This is an experimental musical heuristic; listening comparisons matter as well as tests.
