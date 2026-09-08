@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildSoloPhrases,phraseForLocation} from '../src/solo-phrases.js';
+import {buildSoloPhrases,phraseForLocation,SOLO_PHRASING_STYLES} from '../src/solo-phrases.js';
 import {chordPitchClasses,mod12,notePc} from '../src/theory.js';
 
 const validSustain=(phrase,note)=>phrase.events.filter(e=>e.beat>note.beat&&e.beat<note.beat+note.duration-1e-7).every(e=>e.chord!=='N.C.'&&chordPitchClasses(e.chord).includes(mod12(note.pitch)));
@@ -244,4 +244,69 @@ test('guide-note spelling wraps seven letter names without spurious accidentals'
  const tune={key:'Bb',style:'swing',timeSignature:'4/4',form:['A'],sections:{A:{bars:[['Bbmaj7'],['Ebmaj7']]}}};
  const phrases=buildSoloPhrases(tune,3);
  assert.ok(phrases.flatMap(p=>p.dots).every(n=>!n.label.includes('bbb')&&!n.label.includes('###')));
+});
+
+test('phrasing styles are stable and varied preserves the legacy phrase exactly',()=>{
+ assert.deepEqual(SOLO_PHRASING_STYLES,['varied','motivic','lyrical']);
+ const t=tune([['Dm7'],['G7'],['Cmaj7'],['Am7']]);t.style='swing';
+ const implicit=buildSoloPhrases(t,5,{level:'intermediate'}),explicit=buildSoloPhrases(t,5,{level:'intermediate',phrasing:'varied'});
+ assert.deepEqual(explicit,implicit);
+ assert.deepEqual(implicit.flatMap(p=>p.riff.map(n=>[n.writtenBeat,n.writtenDuration,n.pitch,n.tie])),[
+  [1,.5,65,false],[1.5,.5,64,false],[2.5,.5,60,false],[3,.5,65,false],[3.5,1.5,62,false],[7.5,1,55,false],
+  [0,.5,55,true],[.5,.5,57,false],[1,.5,60,false],[2,.5,67,false],[2.5,.5,62,false],[5,.5,64,false],[5.5,.5,66,false],[6.5,.5,67,false],
+ ]);
+});
+
+test('motivic phrasing remembers and transforms a rhythmic idea',()=>{
+ const t=tune(Array.from({length:8},(_,i)=>[i%2?'G7':'Dm7']));t.style='swing';
+ const phrases=buildSoloPhrases(t,5,{level:'advanced',phrasing:'motivic'}),written=[];let offset=0;
+ for(const phrase of phrases){written.push(...phrase.riff.filter(n=>!n.tie).map(n=>n.writtenBeat+offset));offset+=phrase.beats;}
+ const normalized=(slice)=>slice.map(beat=>beat-slice[0]);
+ const statement=normalized(written.slice(0,5)),displaced=normalized(written.slice(5,10)),augmented=normalized(written.slice(10,15));
+ assert.deepEqual(displaced,statement,'the displaced echo retains the motif intervals');
+ assert.deepEqual(augmented,statement.map(interval=>interval*2),'augmentation doubles the motif intervals');
+ assert.ok(new Set(written.slice(15).map((beat,i)=>i?+(beat-written[14+i]).toFixed(6):null)).size>3,'development also changes phrase length and subdivision');
+ assert.deepEqual(buildSoloPhrases(t,5,{level:'advanced',phrasing:'motivic'}),phrases);
+});
+
+test('motivic triplet flourishes return subsequent phrases to the half-beat grid',()=>{
+ const chords=['Cmaj7','Dm7','G7','Am7'];
+ const t=tune(Array.from({length:12},(_,i)=>[chords[i%chords.length]]));t.style='swing';
+ const phrases=buildSoloPhrases(t,5,{level:'advanced',phrasing:'motivic'});
+ for(const sentence of new Set(phrases.map(p=>p.sentence))){
+  const group=phrases.filter(p=>p.sentence===sentence),written=[];let offset=0;
+  for(const phrase of group){written.push(...phrase.riff.filter(n=>!n.tie).map(n=>n.writtenBeat+offset));offset+=phrase.beats;}
+  const flourish=written.map((beat,index)=>({beat,index})).filter(({beat})=>Math.abs(beat*2-Math.round(beat*2))>1e-7);
+  assert.ok(flourish.length<=2,`${flourish.length} triplet-subdivision attacks in sentence ${sentence}`);
+  if(flourish.length){
+   const after=written.slice(flourish.at(-1).index+1);
+   assert.ok(after.every(beat=>Math.abs(beat*2-Math.round(beat*2))<1e-7),`triplet drift after ${flourish.at(-1).beat}`);
+  }
+ }
+});
+
+test('lyrical phrasing composes a sparser grammar with sustained answers',()=>{
+ const t=tune(Array.from({length:8},(_,i)=>[i%2?'G7':'Dm7']));t.style='bossa';
+ const motivic=buildSoloPhrases(t,5,{level:'advanced',phrasing:'motivic'}).flatMap(p=>p.riff.filter(n=>!n.tie));
+ const lyrical=buildSoloPhrases(t,5,{level:'advanced',phrasing:'lyrical'}).flatMap(p=>p.riff.filter(n=>!n.tie));
+ assert.ok(lyrical.length<motivic.length*.7,`${lyrical.length}/${motivic.length}`);
+ assert.ok(lyrical.filter(n=>n.writtenDuration>=1.5).length>=lyrical.length/2);
+ assert.notDeepEqual(lyrical.map(n=>n.writtenBeat),motivic.map(n=>n.writtenBeat));
+});
+
+test('new phrasing grammars respect meter, rests, swing, and unique attacks',()=>{
+ for(const meter of ['3/4','4/4','5/4'])for(const phrasing of ['motivic','lyrical'])for(const level of ['beginner','advanced']){
+  const t=tune([['Dm7'],['N.C.'],['G7'],['Cmaj7'],['Am7'],['N.C.']],{meter});t.style='swing';
+  const phrases=buildSoloPhrases(t,5,{level,phrasing});
+  for(const phrase of phrases){
+   const attacks=phrase.riff.filter(n=>!n.tie);
+   assert.equal(new Set(attacks.map(n=>n.writtenBeat.toFixed(7))).size,attacks.length);
+   for(const note of attacks){
+    const event=phrase.events.find(e=>e.key===note.eventKey);assert.ok(event&&event.chord!=='N.C.');assert.ok(validSustain(phrase,note));
+    if(level==='beginner'){assert.ok(Number.isInteger(note.writtenBeat));assert.ok(chordPitchClasses(event.chord).includes(mod12(note.pitch)));}
+    const fraction=note.writtenBeat-Math.floor(note.writtenBeat);
+    if(Math.abs(fraction-.5)<1e-7)assert.ok(Math.abs((note.beat-Math.floor(note.beat))-2/3)<1e-7);
+   }
+  }
+ }
 });

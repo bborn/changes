@@ -152,3 +152,12 @@ test('solo tab shows held notes continuing into the following measure',()=>{
  const html=render({state:{...baseState,tune,view:'scales'},actions});
  assert.match(html,/class="riff-tie"/);
 });
+
+test('solo phrasing picker preserves the selected style separately from difficulty', () => {
+  for (const soloPhrasing of ['varied','motivic','lyrical']) {
+    const html = render({state: {...baseState, view:'scales', tune:fixture, soloPhrasing, soloLevel:'advanced'}, actions});
+    assert.match(html, /aria-label="Solo phrasing"/);
+    assert.match(html, new RegExp(`value="${soloPhrasing}" selected=""`));
+    assert.match(html, /aria-label="Solo difficulty" aria-valuetext="advanced"/);
+  }
+});

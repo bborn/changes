@@ -60,7 +60,7 @@ Source projects: [ChoCo](https://github.com/smashub/choco), [OpenEWLD](https://g
 
 - **Chart:** chord changes, nearby fingerings, section loops.
 - **Chords:** alternate voicings and note names.
-- **Solo:** stable two-bar maps, landing/passing notes, suggested phrases composed across neighboring measures, and beginner/intermediate/advanced difficulty. Phrase playback and melody playback are independent.
+- **Solo:** stable two-bar maps, landing/passing notes, suggested phrases composed across neighboring measures, and beginner/intermediate/advanced difficulty. A separate Phrasing picker offers Varied, Motif development, and Lyrical examples. Phrase playback and melody playback are independent.
 - **Melody:** tab, staff notation, or both; note hints and playback highlights.
 - **Settings gear:** instrument levels/mutes, melody, song editing and export.
 - **Space:** pause/resume. **Shift+Space:** restart with a count-in.
