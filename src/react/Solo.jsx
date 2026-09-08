@@ -140,6 +140,7 @@ export function Solo({ state, actions, engine }) {
       (state.soloFollow && active) ||
       phrases.find((p) => p.id === state.soloPage) ||
       phrases[0];
+
   useEffect(() => {
     const scroller = root.current?.querySelector(".phrase-scroll");
     if (!scroller || !chosen || scroller.dataset.shown === chosen.id) return;
@@ -183,6 +184,22 @@ export function Solo({ state, actions, engine }) {
       scroller.removeEventListener("scrollend", reset);
     };
   }, [chosen?.id, state.playing, state.soloFollow, phrases]);
+  useEffect(() => {
+    if (instrument !== "piano" || !state.soloFollow) return;
+    const guide = root.current;
+    const reveal = () => {
+      const card = guide?.querySelector(".phrase-page");
+      const transportTop = document.querySelector(".transport")?.getBoundingClientRect().top ?? innerHeight;
+      if (!card || card.getBoundingClientRect().bottom <= transportTop) return;
+      const tabsHeight = document.querySelector(".view-bar")?.getBoundingClientRect().height ?? 0;
+      const delta = guide.getBoundingClientRect().top - tabsHeight - 8;
+      if (delta > 0) window.scrollBy({top: delta, behavior: "instant"});
+    };
+    const observer = new ResizeObserver(reveal);
+    if (guide) observer.observe(guide);
+    const frame = requestAnimationFrame(reveal);
+    return () => { cancelAnimationFrame(frame); observer.disconnect(); };
+  }, [instrument, state.playing, state.soloFollow, state.soloLevel, state.soloRegister]);
   useEffect(() => {
     const scroller = root.current?.querySelector(".phrase-scroll");
     if (!scroller) return;
@@ -264,7 +281,7 @@ export function Solo({ state, actions, engine }) {
     ),
   ];
   return (
-    <section className="solo-guide" ref={root}>
+    <section className={`solo-guide${instrument === "piano" ? " piano-solo" : ""}`} ref={root}>
       <div className="solo-toolbar">
         <div className="solo-mode">
           <button
@@ -462,14 +479,7 @@ export function Solo({ state, actions, engine }) {
                     onClick={noteEvent}
                     onKeyDown={keyEvent}
                   />
-                ) : instrument === "piano" ? (
-                  <Keyboard
-                    notes={phraseKeyboardNotes(phrase, next)}
-                    activePitch={sounding?.phraseId === phrase.id ? sounding.pitch : null}
-                    onNote={(pitch) => actions.previewNotes([pitch])}
-                    label={`Notes for bars ${range(phrase)}`}
-                  />
-                ) : (
+                ) : instrument === "piano" ? null : (
                   <NoteNames
                     notes={phraseKeyboardNotes(phrase, next)}
                     activePitch={sounding?.phraseId === phrase.id ? sounding.pitch : null}
@@ -477,7 +487,7 @@ export function Solo({ state, actions, engine }) {
                     label={`Notes for bars ${range(phrase)}`}
                   />
                 )}
-                <div className="phrase-legend">
+                <div className="phrase-legend" hidden={instrument === "piano"}>
                   <span>
                     <i className="target-key" /> Land
                   </span>
@@ -529,6 +539,22 @@ export function Solo({ state, actions, engine }) {
           })}
         </div>
       </div>
+      {instrument === "piano" && chosen && (
+        <div className="solo-keyboard-reference">
+          <Keyboard
+            notes={phraseKeyboardNotes(chosen, phrases[(phrases.indexOf(chosen) + 1) % phrases.length])}
+            activePitch={sounding?.phraseId === chosen.id ? sounding.pitch : null}
+            onNote={(pitch) => actions.previewNotes([pitch])}
+            label="Solo piano keyboard"
+          />
+          <div className="phrase-legend">
+            <span><i className="target-key" /> Land</span>
+            <span><i className="common-key" /> Shared</span>
+            <span><i className="passing-key" /> Passing</span>
+            <span><i className="next-key" /> Next</span>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

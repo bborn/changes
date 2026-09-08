@@ -1,3 +1,4 @@
+import {MusicalTypingProvider, MusicalTypingControl} from './MusicalTyping.jsx';
 import {PRACTICE_LOOPS} from '../practice-loops.js';
 import React, { useEffect, useRef } from "react";
 import { PracticeViews, Voicings } from "./PracticeViews.jsx";
@@ -260,6 +261,7 @@ function Settings({ state, actions }) {
           <option value="other">Other · concert pitch</option>
         </select>
       </label>
+      {state.instrument === "piano" && <MusicalTypingControl />}
       <div className="mixer-tracks">
         {Object.entries(state.tracks).map(([name, track]) => (
           <div className="mixer-track" key={name}>
@@ -541,7 +543,7 @@ export function App() {
     state.chartFollow,
   ]);
   return (
-    <>
+    <MusicalTypingProvider instrument={state.instrument} onPlay={actions.previewNotes}>
       <Sidebar state={state} actions={actions} />
       <main className="workspace" aria-busy={state.loading} inert={state.sheet}>
         {state.error && (
@@ -565,7 +567,7 @@ export function App() {
       {state.sheet && (
         <VoicingSheet state={state} actions={actions} engine={engine} />
       )}
-    </>
+    </MusicalTypingProvider>
   );
 }
 export default App;

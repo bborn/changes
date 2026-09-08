@@ -9,7 +9,7 @@ import {
 import { planShapes } from "../voice-leading.js";
 import { renderFretboard } from "../fretboard.js";
 import { SvgMarkup } from "./SvgMarkup.jsx";
-import { Keyboard, NoteNames } from "./Keyboard.jsx";
+import { Keyboard, NoteNames, keyboardRange } from "./Keyboard.jsx";
 
 export function pianoVoicings(chord) {
   const pcs = chordPitchClasses(chord);
@@ -163,6 +163,7 @@ export function Voicings({ state, actions }) {
                 <h3>{voicing.name}</h3>
                 <Keyboard
                   notes={notes}
+                  range={keyboardRange(piano.flatMap(v => v.pitches.map(pitch => ({pitch}))))}
                   activePitch={state.activePitch}
                   onNote={(pitch) => actions.previewNotes([pitch])}
                   label={`${state.chord} ${voicing.name}`}

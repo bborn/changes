@@ -105,3 +105,5 @@ Choose **Settings → Instrument**:
 - **Other** shows note names and standard notation without guitar fingerings. Notes are in concert pitch; written-pitch transposition for instruments such as B♭ trumpet is not yet included.
 
 Piano and Other show melody and example phrases in treble-clef notation. The solo **Register** selector chooses C3–B4, C4–B5, or C5–B6. This is a visual and practice-range choice, not an automatic instrument-range check. Switching instruments stops playback so the new view and generated phrase start together; it does not change the song or its key. Your instrument choice is saved with your practice settings. Guitar's tab preference is retained when switching back.
+
+Piano Settings also includes **Musical typing**: A–L play notes (W/E/T/Y/U/O are black keys), and Z/X shift octaves. Space keeps its pause/resume behavior. Musical typing starts off and does not intercept text fields or modified shortcuts.
