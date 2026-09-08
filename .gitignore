@@ -14,3 +14,5 @@ scripts/vendor/
 data/melody-sources.json
 wrangler.jsonc
 *.sql.dump
+
+.deploy/

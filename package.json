@@ -8,7 +8,10 @@
     "start": "node scripts/serve.mjs",
     "build": "node scripts/build.mjs",
     "test": "node --test tests/*.test.js",
-    "import:tunes": "node scripts/import-tunes.mjs"
+    "import:tunes": "node scripts/import-tunes.mjs",
+    "deploy:public": "node scripts/deploy.mjs public",
+    "deploy:personal": "node scripts/deploy.mjs personal",
+    "deploy:all": "npm run deploy:public && npm run deploy:personal"
   },
   "engines": {
     "node": ">=22"

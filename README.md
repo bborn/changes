@@ -107,3 +107,24 @@ Choose **Settings → Instrument**:
 Piano and Other show melody and example phrases in treble-clef notation. The solo **Register** selector chooses C3–B4, C4–B5, or C5–B6. This is a visual and practice-range choice, not an automatic instrument-range check. Switching instruments stops playback so the new view and generated phrase start together; it does not change the song or its key. Your instrument choice is saved with your practice settings. Guitar's tab preference is retained when switching back.
 
 Piano Settings also includes **Musical typing**: A–L play notes (W/E/T/Y/U/O are black keys), and Z/X shift octaves. Space keeps its pause/resume behavior. Musical typing starts off and does not intercept text fields or modified shortcuts.
+
+## One codebase, separate deployments
+
+Use this repository for both a personal instance and the public demo. Personal song files live in ignored `tunes/`; the personal server keeps its existing D1 library. The public build excludes those files and uses browser-local storage.
+
+Create an ignored `.local/deploy.json` with your Pages project names:
+
+```json
+{
+  "public": {"project": "your-public-demo"},
+  "personal": {"project": "your-personal-app"}
+}
+```
+
+For personal deployment, copy `wrangler.example.jsonc` to ignored `wrangler.jsonc` and configure your existing D1 binding and library ID. Keep this file and your music backed up outside Git.
+
+- `npm run deploy:public` builds and deploys the empty-catalog public demo without Functions or database bindings.
+- `npm run deploy:personal` builds and deploys your local songs plus the personal backend.
+- `npm run deploy:all` updates both from this checkout.
+
+Add `-- --prepare-only` to either individual command to inspect its isolated package under ignored `.deploy/` without uploading it. Run deployments sequentially; they share the build directory.
