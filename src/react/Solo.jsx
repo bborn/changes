@@ -36,7 +36,7 @@ const esc = (value) =>
         c
       ],
   );
-function neck(phrase, start, nextTarget) {
+export function neck(phrase, start, nextTarget) {
   const left = 34,
     top = 24,
     gap = 62,
@@ -51,7 +51,7 @@ function neck(phrase, start, nextTarget) {
   for (let f = 0; f < 4; f++)
     svg += `<text class="fret-number" text-anchor="middle" x="${left + (f + 0.5) * gap}" y="182">${start + f}</text>`;
   const dots = [...phrase.dots];
-  for (const note of phrase.riff)
+  for (const note of phrase.riff.flatMap(n => n.harmony ? [n, n.harmony] : [n]))
     if (
       !dots.some((dot) => dot.string === note.string && dot.fret === note.fret)
     )
@@ -85,16 +85,32 @@ function neck(phrase, start, nextTarget) {
   }
   return svg + "</svg>";
 }
-function riffMeasure(notes, beats) {
+export function riffMeasure(notes, beats) {
   const left = 30,
     unit = 250 / beats;
   let svg =
     '<svg class="phrase-riff" viewBox="0 0 296 118" role="img" aria-label="Original practice phrase in guitar tab">';
   for (let s = 1; s <= 6; s++)
     svg += `<text x="7" y="${s * 16 + 5}">${["", "e", "B", "G", "D", "A", "E"][s]}</text><line x1="24" x2="290" y1="${s * 16}" y2="${s * 16}"/>`;
-  for (const n of notes) {
+  for (const [index, n] of notes.entries()) {
     const x = left + n.beat * unit,
       y = n.string * 16;
+    if (n.articulation && !n.tie) {
+      const previous = notes[index - 1];
+      const fromX = previous && previous.string === n.articulation.fromString
+        ? left + previous.beat * unit + 9 : Math.max(24, x - 24);
+      const endX = x - 9;
+      const type = n.articulation.type;
+      const title = type === "hammer" ? "Hammer-on" : type === "pull" ? "Pull-off" : "Slide";
+      const path = type === "slide"
+        ? `M ${fromX} ${y + (n.pitch > n.articulation.fromPitch ? 6 : -6)} L ${endX} ${y}`
+        : `M ${fromX} ${y-5} Q ${(fromX+endX)/2} ${y-18} ${endX} ${y-5}`;
+      svg += `<g class="riff-articulation" data-articulation="${type}"><title>${title}</title><path d="${path}" fill="none" stroke="currentColor"/><text x="${(fromX+endX)/2}" y="${y-8}" text-anchor="middle">${type === "hammer" ? "H" : type === "pull" ? "P" : ""}</text></g>`;
+    }
+    if (n.harmony) {
+      const harmonyY = n.harmony.string * 16;
+      svg += `<g class="riff-double-stop"><title>Double-stop</title><line x1="${x}" x2="${x}" y1="${y}" y2="${harmonyY}"/><rect x="${x-8}" y="${harmonyY-8}" width="16" height="16"/><text class="riff-fret" text-anchor="middle" x="${x}" y="${harmonyY+4}">${n.harmony.fret}</text><line class="riff-duration" x1="${x+9}" x2="${Math.max(x+10,left+(n.beat+n.duration)*unit-5)}" y1="${harmonyY}" y2="${harmonyY}"/>${n.tie ? `<path class="riff-tie" d="M ${x-7} ${harmonyY-11} Q ${x} ${harmonyY-18} ${x+7} ${harmonyY-11}" fill="none" stroke="currentColor"/>` : ""}</g>`;
+    }
     if(n.tie)svg += `<path class="riff-tie" d="M ${x-7} ${y-11} Q ${x} ${y-18} ${x+7} ${y-11}" fill="none" stroke="currentColor"/>`;
     svg += `<rect x="${x - 8}" y="${y - 8}" width="16" height="16"/><text class="riff-fret" text-anchor="middle" x="${x}" y="${y + 4}">${n.fret}</text><line class="riff-duration" x1="${x + 9}" x2="${Math.max(x + 10, left + (n.beat + n.duration) * unit - 5)}" y1="${y}" y2="${y}"/>`;
   }
@@ -243,7 +259,7 @@ export function Solo({ state, actions, engine }) {
         const on = Boolean(
           note &&
           dot.closest("[data-phrase]")?.dataset.phrase === note.phraseId &&
-          dot.dataset.soloPosition === `${note.string}-${note.fret}`,
+          [note, note.harmony].filter(Boolean).some(n => dot.dataset.soloPosition === `${n.string}-${n.fret}`),
         );
         dot.classList.toggle("is-sounding", on);
       });

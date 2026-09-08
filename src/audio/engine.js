@@ -72,6 +72,7 @@ export class AudioEngine extends EventTarget {
   }
   async pause() {
     if (!this.playing) return;
+    this.previewEngine?.stop();
     this.playing=false;this.paused=true;clearTimeout(this.timer);
     await this.context.suspend();
     this.publishSoloNote(null);
@@ -141,7 +142,7 @@ export class AudioEngine extends EventTarget {
     const start=player.context.currentTime+.03;
     for(const note of notes){
       const delay=note.tie?0:Math.min(note.timingOffset||0,note.duration*seconds*.15);
-      player.phraseNote(note.pitch,start+note.beat*seconds+delay,note.duration*seconds-delay,player.previewFilter,note.velocity);
+      player.schedulePhraseNote(note,start+note.beat*seconds+delay,note.duration*seconds-delay,player.previewFilter);
     }
     const duration=Math.max(0,...notes.map(n=>n.beat+n.duration))*seconds;
     await new Promise(resolve=>{
@@ -151,11 +152,21 @@ export class AudioEngine extends EventTarget {
     });
   }
   /** A softer single-note voice with a short release between phrase notes. */
-  phraseNote(pitch,time,duration,destination=this.soloFilter,velocity=1) {
+  phraseNote(pitch,time,duration,destination=this.soloFilter,velocity=1,articulation=null) {
     const expression=Math.max(.4,Math.min(1.2,Number(velocity)||1));
     const length=Math.max(.1,duration)+Math.min(.07,duration*.15);
-    const source=this.samples?this.sample('piano',pitch,time,length,destination,.22*expression):this.tone(pitch,time,length,destination,.12*expression,'triangle');
+    const connected=articulation?.type==='hammer'||articulation?.type==='pull';
+    const sliding=articulation?.type==='slide';
+    const level=(this.samples?.22:.12)*expression*(connected?.62:sliding?.82:1);
+    const attack=connected?.018:sliding?.012:(this.samples?.003:.008);
+    const source=this.samples?this.sample('piano',pitch,time,length,destination,level,attack):this.tone(pitch,time,length,destination,level,'triangle',0,attack);
     if(source)this.phraseSources.add(source);return source;
+  }
+  schedulePhraseNote(note,time,duration,destination=this.soloFilter) {
+    const sources=[];
+    sources.push(this.phraseNote(note.pitch,time,duration,destination,note.velocity,note.tie?null:note.articulation));
+    if(note.harmony?.pitch!=null)sources.push(this.phraseNote(note.harmony.pitch,time,duration,destination,(Number(note.velocity)||1)*.88,null));
+    return sources.filter(Boolean);
   }
   scheduleSoloPhrase(event,now=this.context.currentTime) {
     if(!this.hearPhrases||event.countIn||event.beat!==0)return;
@@ -166,7 +177,7 @@ export class AudioEngine extends EventTarget {
       const delay=note.tie?0:Math.min(note.timingOffset||0,note.duration*event.duration*.15);
       const time=event.time+(note.beat-barOffset)*event.duration+delay,duration=note.duration*event.duration-delay;
       if(time>=now-.03){
-        if(!note.tie||!this.soloNoteQueue.some(held=>held.pitch===note.pitch&&held.time<time&&held.end>time))this.phraseNote(note.pitch,time,duration,this.soloFilter,note.velocity);
+        if(!note.tie||!this.soloNoteQueue.some(held=>held.pitch===note.pitch&&held.time<time&&held.end>time))this.schedulePhraseNote(note,time,duration,this.soloFilter);
         this.soloNoteQueue.push({...note,phraseId:phrase.id,time,end:time+duration});
       }
     }
@@ -236,22 +247,22 @@ export class AudioEngine extends EventTarget {
     node.start(time);
     node.stop(time + duration + 0.02);
   }
-  tone(midi, time, duration, destination, level = 0.22, type = 'triangle', detune = 0) {
+  tone(midi, time, duration, destination, level = 0.22, type = 'triangle', detune = 0, attack = 0.008) {
     const oscillator = this.context.createOscillator();
     oscillator.type = type;
     oscillator.frequency.value = frequency(midi);
     oscillator.detune.value = detune;
-    this.source(oscillator, time, duration, destination, level);return oscillator;
+    this.source(oscillator, time, duration, destination, level,attack);return oscillator;
   }
   async prepareSamples(){
     if(this.samples)return;
     if(!this.samplePromise)this.samplePromise=loadSamples(this.context).then(samples=>{this.samples=samples;}).finally(()=>{this.samplePromise=null;});
     await this.samplePromise;
   }
-  sample(kind,midi,time,duration,destination,level){
+  sample(kind,midi,time,duration,destination,level,attack=.003){
     const sample=nearestSample(this.samples[kind],midi),node=this.context.createBufferSource(),gain=this.context.createGain();
     node.buffer=sample.buffer;node.playbackRate.value=2**((midi-sample.midi+(sample.cents||0)/100)/12);
-    gain.gain.setValueAtTime(.0001,time);gain.gain.linearRampToValueAtTime(level,time+.003);
+    gain.gain.setValueAtTime(.0001,time);gain.gain.linearRampToValueAtTime(level,time+attack);
     gain.gain.setValueAtTime(level,time+Math.max(.004,duration-.055));gain.gain.exponentialRampToValueAtTime(.0001,time+Math.max(.01,duration));
     node.connect(gain);gain.connect(destination);this.sources.add(node);
     node.onended=()=>{this.sources.delete(node);this.phraseSources.delete(node);node.disconnect();gain.disconnect();};node.start(time);node.stop(time+duration+.02);return node;

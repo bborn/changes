@@ -4,9 +4,9 @@ The generator is a small, deterministic phrase grammar followed by a minimum-cos
 
 ## Musical structure
 
-An eight-bar sentence states a rhythmic motif, echoes it against the next harmony, delays/develops the next entry, and closes with a shorter answer. Adjacent two-bar maps share a motif family. Later sentences use other families and contours.
+Four-to-eight-bar sentences are composed across the two-bar display cards. Chord and form identity seed rhythmic fragments, varied entries and breaths, and a shared pitch contour. Longer sentences include connected passages spanning more than two measures, followed by shorter answers. The result stays deterministic so a practice example can be repeated.
 
-Silence is planned before pitch selection. Chord boundaries no longer force extra notes into rests. Notes release before harmonic changes, phrases leave audible breaths, and the answer ends on a current-chord guide tone. Beginner uses sparse quarters; advanced adds subdivisions inside bursts while retaining space.
+Silence is planned before pitch selection. Chord boundaries no longer force extra notes into rests. Notes release before harmonic changes, phrases leave audible breaths, and the answer ends on a current-chord guide tone. Beginner uses sparse quarters. More difficult examples contrast sustained statements, syncopated motifs, and flowing eighth-note passages. Triplets are occasional embellishments rather than the default Advanced rhythm. Holds use longer intended durations instead of the short gate applied to passing notes.
 
 The existing pitch search balances contour, fretboard travel, chord tones on strong beats, and nearby scale tones elsewhere. This is a practical heuristic, not a trained improviser or a claim to reproduce a research model.
 
@@ -25,6 +25,12 @@ Pitch selection now uses a bounded beam search over a complete phrase contour, r
 
 Connected two-measure gestures now use a late pickup and omit the following downbeat attack. A shared chord tone can sustain across a bar line; incompatible harmonic changes and no-chord regions terminate it. Breathing space is reserved at the sentence ending rather than imposed on every measure. The per-bar tab clips durations to each measure and shows tied continuation notes in the next one.
 
-Neighboring display cards are now composed together as one four-bar sentence before being split for display. The contour and pitch-history search spans the card boundary. A note crossing that boundary appears as a tied continuation on the following card; automatic playback keeps the original voice sounding rather than attacking it twice. Auditioning a card independently still sounds its opening continuation. Sentence endings retain breathing room.
+Neighboring display cards are now composed together as one four-to-eight-bar sentence before being split for display. The contour and pitch-history search spans the card boundary. A note crossing that boundary appears as a tied continuation on the following card; automatic playback keeps the original voice sounding rather than attacking it twice. Auditioning a card independently still sounds its opening continuation. Sentence endings retain breathing room.
 
 All styles now use deterministic, small attack offsets and velocity variation. Phrase entries and harmonic boundaries stay anchored; interior notes arrive 3–15 ms late in straight styles and 8–20 ms late in swing. Offsets are capped relative to note length and subtracted from duration so releases do not drift. Tied continuations remain anchored. Preview and automatic playback share these offsets, and highlights use the resulting audible schedule.
+
+Guitar examples add feasible same-string hammer-ons, pull-offs and slides, plus occasional adjacent-string double-stops. Beginner and non-guitar examples omit these techniques. Double-stop tones must fit every chord they sustain across. Tab shows H/P arcs, slide lines and vertically aligned simultaneous notes; both double-stop positions light up during playback. The current sampled voice uses softer attacks for legato, not synthetic pitch bends; slide markings describe the guitar technique to practice rather than a realistic guitar recording.
+
+[Berklee: Got Rhythm?](https://college.berklee.edu/bt/193/lesson.html) informed the varied phrase lengths and movement across bar lines.
+
+The contrast between sustained statements and dense runs follows [Hal Crook’s Berklee discussion of continuity and rhythmic balance](https://www.berklee.edu/berklee-today/spring-2007/the-woodshed/musical-freedom), alongside [Jazzadvice’s guidance on longer lines](https://www.jazzadvice.com/lessons/playing-longer-lines-in-your-solos/). These guide the local heuristic; they are not a guarantee of human-level composition.

@@ -7,6 +7,7 @@ const positions=start=>Array.from({length:6},(_,i)=>i+1).flatMap(string=>
 const positionKey=n=>n.string==null?`pitch-${n.pitch}`:`${n.string}-${n.fret}`;
 const stringDistance=(a,b)=>a.string==null||b.string==null?0:Math.abs(a.string-b.string);
 const melodicPosition=n=>n.string==null||n.string<=4;
+const stableHash=value=>[...value].reduce((hash,char)=>(hash*31+char.charCodeAt(0))>>>0,2166136261);
 const LETTERS='CDEFGAB',NATURAL={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
 function targetLabel(note,chord){
  const interval=mod12(note.pc-chord.rootPc),steps=[3,4].includes(interval)?2:[10,11].includes(interval)?6:null;
@@ -77,33 +78,44 @@ function practiceRiff(events,beats,board,{style,beatsPerBar,variant=0,level='int
  // An eight-bar sentence: state, echo, develop, then answer and breathe.
  // Plan the silence first; chord changes must not fill it back in.
  const role=variant%4,family=Math.floor(variant/4)%3;
+ // These are fragments rather than bar patterns. Rotating them over the whole
+ // sentence lets an idea run through a bar line and puts breaths in different
+ // places instead of making every measure restart on beat one.
  const patterns=level==='beginner'?[
-  [[0,1],[0,2]],[[1,2],[1]],[[0,2],[0,1]],
+  [0,1,2],[1,2],[0,2,3],[0,1,3],[1,3],[0,1,2,3],
  ]:level==='advanced'?[
-  [[0,1/3,2/3,1,1.5,2],[0,1/3,2/3,1,1.5,2]],
-  [[.5,1,1.5,2,2+1/3,2+2/3],[.5,1,1.5,2]],
-  [[0,.5,1,1+1/3,1+2/3],[0,.5,1,1+1/3,1+2/3,2]],
+  [0,.5,1.5,2,3.5],[.5,1,2,2.5,3.5],[0,1.5,3],
+  [.5,2.5],[0,.5,1,2,3],[1,2.5],
  ]:[
-  [[0,.5,1],[0,.5,1,2]],
-  [[.5,1,2],[.5,1,2]],
-  [[0,1,1.5],[0,1,1.5,2]],
+  [0,.5,1,2,3],[.5,1,2,2.5,3.5],[0,1,1.5,2.5,3],
+  [0,.5,1.5,2,3.5],[1,1.5,2.5,3],[0,.5,1,2,2.5,3.5],
  ];
- const rhythm=patterns[family];
- const swing=style==='swing',starts=[];
+ const swing=style==='swing',starts=[];let previousConnects=false;
  for(let bar=0;bar<Math.ceil(beats/beatsPerBar);bar++){
-  let motif=[...rhythm[bar%2]];
-  const connects=beats>beatsPerBar&&role!==3;
-  if(connects&&bar<Math.ceil(beats/beatsPerBar)-1)motif[motif.length-1]=beatsPerBar-(level==='beginner'?1:.5);
-  if(connects&&bar>0)motif=motif.filter(beat=>beat>0);
-  // The last answer is shorter. A developed statement has a delayed entry.
-  if(role===3&&bar%2===1)motif=motif.slice(0,level==='beginner'?1:2);
+  const patternIndex=(bar*5+variant*3+family)%patterns.length;
+  let motif=[...patterns[patternIndex]].filter(beat=>beat<beatsPerBar);
+  const sparseStatement=motif.length<=2;
+  // One extended run in longer sentences gives the player a chance to carry
+  // momentum for more than two bars. Other bars deliberately breathe.
+  const runStart=1+(variant%2),inLongRun=beats>=beatsPerBar*6&&bar>=runStart&&bar<runStart+3;
+  if(inLongRun&&level!=='beginner')motif=Array.from({length:Math.ceil(beatsPerBar*2)},(_,i)=>i/2).filter(beat=>beat<beatsPerBar);
+  // A triplet is a single embellishment in the sentence, not its default pulse.
+  const tripletBar=beats>=beatsPerBar*4?(variant+4)%Math.ceil(beats/beatsPerBar):-1;
+  if(level==='advanced'&&bar===tripletBar&&!inLongRun)motif=[0,1/3,2/3,...motif.filter(beat=>beat>=1)];
+  if(!inLongRun&&((bar+variant)%4===3))motif=motif.slice(0,level==='beginner'?1:2);
+  if((bar+variant)%5===2&&!inLongRun)motif=motif.filter(beat=>beat>=1);
+  const connects=bar<Math.ceil(beats/beatsPerBar)-1&&(beats<=beatsPerBar*2||inLongRun||(bar+variant)%3!==2);
+  if(previousConnects&&!inLongRun)motif=motif.filter(beat=>beat>0);
+  if(connects&&!motif.includes(beatsPerBar-(level==='beginner'?1:.5)))motif.push(beatsPerBar-(level==='beginner'?1:.5));
+  const sustainGesture=sparseStatement||(!inLongRun&&motif.length<=2);
   for(const [motifIndex,beat] of motif.entries()){
-   const shifted=beat+(role===2&&bar===0&&beat<beatsPerBar-1?(level==='beginner'?1:.5):0);
+   const shifted=beat+(role===2&&bar===0&&beat<beatsPerBar-1?(level==='beginner'?1:level==='advanced'?0:.5):0);
    const offset=swing&&shifted%1===.5?Math.floor(shifted)+2/3:shifted;
-   if(offset<(bar<Math.ceil(beats/beatsPerBar)-1&&connects?beatsPerBar:beatsPerBar-1))starts.push({beat:bar*beatsPerBar+offset,writtenBeat:bar*beatsPerBar+shifted,motifIndex,bar});
+   if(offset<(bar<Math.ceil(beats/beatsPerBar)-1&&connects?beatsPerBar:beatsPerBar-1))starts.push({beat:bar*beatsPerBar+offset,writtenBeat:bar*beatsPerBar+shifted,motifIndex,bar,gesture:inLongRun?'run':sustainGesture?'sustain':'motif'});
   }
+  previousConnects=connects;
  }
- const slots=starts.sort((a,b)=>a.beat-b.beat).filter(slot=>slot.beat<beats).flatMap(({beat,writtenBeat,motifIndex,bar})=>{
+ const slots=starts.sort((a,b)=>a.beat-b.beat).filter(slot=>slot.beat<beats).flatMap(({beat,writtenBeat,motifIndex,bar,gesture})=>{
   const event=events.find(e=>beat>=e.beat-1e-7&&beat<e.beat+e.duration-1e-7);
   if(!event?.target)return [];
   const boundary=Math.abs(beat-event.beat)<1e-7,strong=boundary||Math.abs(beat-Math.round(beat))<1e-7;
@@ -114,7 +126,7 @@ function practiceRiff(events,beats,board,{style,beatsPerBar,variant=0,level='int
    const shared=candidates.filter(n=>pcs.includes(n.pc)&&chordPitchClasses(nextEvent.chord).includes(n.pc));
    if(shared.length)candidates=shared;
   }
-  return [{beat,writtenBeat,event,boundary,motifIndex,bar,candidates:candidates.filter(Boolean)}];
+  return [{beat,writtenBeat,event,boundary,motifIndex,bar,gesture,candidates:candidates.filter(Boolean)}];
  });
  // Resolve the answer on its current chord's guide tone.
  if(slots.length){const last=slots.at(-1);last.candidates=board.filter(n=>n.pitch===last.event.target.pitch&&n.string===last.event.target.string);}
@@ -142,7 +154,7 @@ function practiceRiff(events,beats,board,{style,beatsPerBar,variant=0,level='int
   paths=expanded.sort((a,b)=>a.cost-b.cost).slice(0,48);
  }
  const line=paths.sort((a,b)=>a.cost-b.cost)[0]?.notes||[];
- return line.map((note,i)=>{
+ const notes=line.map((note,i)=>{
   const slot=slots[i];
   let end=slots[i+1]?.beat??beats;
   for(const change of events.filter(e=>e.beat>slot.beat&&e.beat<end)){
@@ -151,8 +163,8 @@ function practiceRiff(events,beats,board,{style,beatsPerBar,variant=0,level='int
   const crosses=slot.beat<(slot.bar+1)*beatsPerBar&&end>(slot.bar+1)*beatsPerBar;
   const gap=end-slot.beat,offbeat=Math.abs(slot.beat-Math.round(slot.beat))>1e-7;
   // Connect the long eighth into an accented, shorter pickup; taper the sentence.
-  const gate=crosses?.96:offbeat?.78:.94;
-  const duration=Math.min(gap*gate, crosses?1.2:i===line.length-1?.9:level==='beginner'?.9:.7, beats-.9-slot.beat);
+  const held=slot.gesture==='sustain',gate=crosses?.96:held?.9:offbeat?.78:.94;
+  const duration=Math.min(gap*gate, held?2.5:crosses?1.2:i===line.length-1?.9:level==='beginner'?.9:.7, beats-.9-slot.beat);
   const emphasis=i===line.length-1?.72:slot.motifIndex===0?.9:offbeat?1.08:.82;
   // Stable performance variation: relaxed interior attacks, anchored phrase entries.
   // Seconds, not accumulated beat shifts; the next phrase never drifts off the band.
@@ -163,9 +175,36 @@ function practiceRiff(events,beats,board,{style,beatsPerBar,variant=0,level='int
   for(const change of events.filter(e=>e.beat>slot.writtenBeat&&e.beat<writtenEnd)){
    if(!change.target||!chordPitchClasses(change.chord).includes(note.pc)){writtenEnd=change.beat;break;}
   }
-  const writtenDuration=Math.min(writtenEnd-slot.writtenBeat,crosses?1.5:i===line.length-1||level==='beginner'?1:.5,beats-1-slot.writtenBeat);
+  const writtenDuration=Math.min(writtenEnd-slot.writtenBeat,held?3:crosses?1.5:i===line.length-1||level==='beginner'?1:.5,beats-1-slot.writtenBeat);
   return {beat:slot.beat,writtenBeat:slot.writtenBeat,writtenDuration,duration,velocity,timingOffset,string:note.string,fret:note.fret,pitch:note.pitch,label:targetLabel(note,parseChord(slot.event.chord)),eventKey:slot.event.key,role:note.pitch===slot.event.target.pitch?'target':chordPitchClasses(slot.event.chord).includes(note.pc)?'chord':'passing'};
  }).filter(note=>note.duration>0);
+ return addGuitarTechniques(notes,events,board,{level,variant});
+}
+
+function addGuitarTechniques(notes,events,board,{level,variant}){
+ if(board[0]?.string==null||level==='beginner')return notes;
+ const enriched=notes.map(note=>({...note}));
+ for(let i=1;i<enriched.length;i++){
+  const previous=enriched[i-1],note=enriched[i],distance=note.pitch-previous.pitch;
+  const connected=note.beat-(previous.beat+previous.duration)<=.3;
+  if(connected&&note.string===previous.string&&distance!==0&&Math.abs(distance)<=4&&(i+variant)%3!==0){
+   const type=(i+variant)%4===0?'slide':distance>0?'hammer':'pull';
+   note.articulation={type,fromPitch:previous.pitch,fromString:previous.string,fromFret:previous.fret};
+  }
+ }
+ const frequency=level==='advanced'?7:13;
+ for(let i=0;i<enriched.length;i++){
+  const note=enriched[i];if(note.role==='passing'||(i*5+variant*3)%frequency!==2)continue;
+  const event=events.find(e=>e.key===note.eventKey);if(!event?.target)continue;
+  const pcs=chordPitchClasses(event.chord);
+  const soundingUntil=note.beat+note.duration;
+  const sustainsSafely=other=>events.filter(change=>change.beat<soundingUntil-1e-7&&change.beat+change.duration>note.beat+1e-7)
+   .every(change=>change.chord!=='N.C.'&&chordPitchClasses(change.chord).includes(other.pc));
+  const candidates=board.filter(other=>Math.abs(other.string-note.string)===1&&other.pitch!==note.pitch&&pcs.includes(other.pc)&&sustainsSafely(other)&&Math.abs(other.fret-note.fret)<=3&&Math.abs(other.pitch-note.pitch)<=12);
+  const harmony=candidates.sort((a,b)=>Math.abs(a.fret-note.fret)-Math.abs(b.fret-note.fret)||Math.abs(a.pitch-note.pitch)-Math.abs(b.pitch-note.pitch))[0];
+  if(harmony)note.harmony={pitch:harmony.pitch,string:harmony.string,fret:harmony.fret,label:targetLabel(harmony,parseChord(event.chord))};
+ }
+ return enriched;
 }
 
 /** Build stable two-bar practice phrases. Pairs never cross a form-section boundary. */
@@ -186,20 +225,28 @@ export function buildSoloPhrases(tune,startFret=5,{loop=null,level='intermediate
   }
   absoluteBar+=sectionBars.length;
  });
- // Compose across display cards, then project that one line into each card.
- for(let first=0;first<phrases.length;first+=2){
-  const group=phrases.slice(first,first+2);let total=0;
+ // Compose four-to-eight bar gestures across display cards, then project the
+ // continuous line back into the existing two-bar cards.
+ for(let first=0;first<phrases.length;){
+  const remaining=phrases.length-first;
+  let cards=Math.min(4,remaining);
+  if(remaining>4&&remaining-cards===1)cards=3;
+  const group=phrases.slice(first,first+cards);let total=0;
   const offsets=group.map(p=>{const offset=total;total+=p.beats;return offset;});
   const events=group.flatMap((p,i)=>p.events.map(e=>({...e,beat:e.beat+offsets[i]})));
-  const line=practiceRiff(events,total,board,{style:tune.style,beatsPerBar,level,variant:Math.floor(first/2)});
+  const sentence=Math.floor(first/2);
+  const identity=events.map(event=>`${event.formIndex}:${event.barIndex}:${event.chord}`).join('|');
+  const variant=(sentence+stableHash(identity))%12;
+  const line=practiceRiff(events,total,board,{style:tune.style,beatsPerBar,level,variant});
   group.forEach((p,i)=>{
-   const offset=offsets[i];p.sentence=first/2;p.sentenceEnd=i===group.length-1;
+   const offset=offsets[i];p.sentence=sentence;p.sentenceEnd=i===group.length-1;
    p.riff=line.filter(n=>n.beat<offset+p.beats&&n.beat+n.duration>offset).map(n=>{
     const tie=n.beat<offset;
     return {...n,writtenBeat:Math.max(0,n.writtenBeat-offset),writtenDuration:tie?n.writtenBeat+n.writtenDuration-offset:n.writtenDuration,beat:Math.max(0,n.beat-offset),duration:tie?n.beat+n.duration-offset:n.duration,tie,
      eventKey:tie?p.events[0].key:n.eventKey};
    });
   });
+  first+=cards;
  }
  return phrases;
 }

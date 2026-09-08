@@ -197,7 +197,7 @@ test('preview while paused uses separate audio without resuming the song',async(
 test('practice phrase preview uses a separate clock and exact meter timing',async()=>{
  const parent=new AudioEngine(),player=new EventTarget(),scheduled=[];
  parent.context={currentTime:17};parent.paused=true;
- Object.assign(player,{generation:0,context:{currentTime:2},initialize:async()=>{},prepareSamples:async()=>{},previewFilter:{},phraseNote:(pitch,time,duration)=>scheduled.push({pitch,time,duration}),stop(){this.generation++;this.dispatchEvent(new Event('stop'));}});
+ Object.assign(player,{generation:0,context:{currentTime:2},initialize:async()=>{},prepareSamples:async()=>{},previewFilter:{},schedulePhraseNote:(note,time,duration)=>scheduled.push({pitch:note.pitch,time,duration}),stop(){this.generation++;this.dispatchEvent(new Event('stop'));}});
  parent.previewEngine=player;
  const playing=parent.previewPhrase([{pitch:64,beat:0,duration:1},{pitch:65,beat:3,duration:.5}],{tempo:120,beatValue:8});
  await new Promise(resolve=>setImmediate(resolve));
@@ -230,6 +230,54 @@ test('canceling a phrase while samples load prevents late preview audio',async()
  Object.assign(player,{generation:0,context:{currentTime:0},initialize:async()=>{},prepareSamples:()=>new Promise(resolve=>{ready=resolve;}),chord:()=>scheduled++,stop(){this.generation++;this.dispatchEvent(new Event('stop'));}});
  parent.previewEngine=player;
  const playing=parent.previewPhrase([{pitch:64,beat:0,duration:1}]);await new Promise(resolve=>setImmediate(resolve));player.stop();ready();await playing;assert.equal(scheduled,0);
+});
+
+test('preview and live phrase scheduling preserve techniques and simultaneous harmony',async()=>{
+ const note={pitch:67,beat:0,duration:1,velocity:.9,articulation:{type:'slide',fromPitch:64,fromString:3,fromFret:5},harmony:{pitch:71,string:2,fret:7,label:'3rd'}};
+ const parent=new AudioEngine(),player=new EventTarget(),preview=[];
+ Object.assign(player,{generation:0,context:{currentTime:2},initialize:async()=>{},prepareSamples:async()=>{},previewFilter:{},schedulePhraseNote:(n,time,duration,destination)=>preview.push({n,time,duration,destination}),stop(){this.generation++;this.dispatchEvent(new Event('stop'));}});
+ parent.previewEngine=player;const playing=parent.previewPhrase([note],{tempo:120});await new Promise(resolve=>setImmediate(resolve));player.stop();await playing;
+ const engine=new AudioEngine(),live=[];engine.context={currentTime:0};engine.timeline={beatsPerBar:4};engine.hearPhrases=true;engine.soloFilter={};engine.schedulePhraseNote=(n,time,duration,destination)=>live.push({n,time,duration,destination});
+ engine.setSoloPhrases([{id:'solo',formIndex:0,bars:[{barIndex:0}],riff:[note]}]);engine.scheduleSoloPhrase({formIndex:0,barIndex:0,beat:0,time:2,duration:.5,countIn:false},1.9);
+ assert.equal(preview[0].n,note);assert.equal(live[0].n,note);assert.equal(preview[0].duration,.5);assert.equal(live[0].duration,.5);
+ assert.deepEqual(engine.soloNoteQueue[0].harmony,note.harmony);
+});
+
+test('preview auditions a tied card start without gliding from an absent predecessor',async()=>{
+ const parent=new AudioEngine(),player=new EventTarget(),heard=[];
+ Object.assign(player,{generation:0,context:{currentTime:1},initialize:async()=>{},prepareSamples:async()=>{},previewFilter:{},phraseNote:(...args)=>heard.push(args),schedulePhraseNote:AudioEngine.prototype.schedulePhraseNote,stop(){this.generation++;this.dispatchEvent(new Event('stop'));}});
+ parent.previewEngine=player;const playing=parent.previewPhrase([{pitch:65,beat:0,duration:.5,tie:true,articulation:{type:'hammer',fromPitch:64}}]);await new Promise(resolve=>setImmediate(resolve));player.stop();await playing;
+ assert.equal(heard.length,1);assert.equal(heard[0][0],65);assert.equal(heard[0][5],null);
+});
+
+test('phrase techniques use clean target pitches and schedule harmony at the same instant',()=>{
+ const engine=new AudioEngine(),calls=[];engine.samples={};engine.sample=(...args)=>{calls.push(args);return {stop(){}};};
+ const note={pitch:67,velocity:1,articulation:{type:'slide',fromPitch:64},harmony:{pitch:71}};
+ engine.schedulePhraseNote(note,1,.4,{});
+ assert.deepEqual(calls.map(call=>call[1]),[67,71]);assert.deepEqual(calls.map(call=>call[2]),[1,1]);
+ assert.equal(calls[0][6],.012);assert.equal(calls[1][6],.003);
+ calls.length=0;engine.schedulePhraseNote({pitch:65,articulation:{type:'hammer',fromPitch:64}},2,.3,{});
+ assert.ok(calls[0][5]<.22);assert.equal(calls[0][6],.018);
+});
+
+test('sampled and fallback technique notes never bend pitch',()=>{
+ const engine=new AudioEngine(),rateRamps=[],frequencyRamps=[];
+ const param=(ramps)=>({value:0,setValueAtTime(){},exponentialRampToValueAtTime(...args){ramps.push(args)}});
+ const source={playbackRate:param(rateRamps),connect(){},disconnect(){},start(){},stop(){}};
+ const gain={gain:{setValueAtTime(){},linearRampToValueAtTime(){},exponentialRampToValueAtTime(){}},connect(){},disconnect(){}};
+ engine.context={createBufferSource:()=>({...source,playbackRate:param(rateRamps)}),createGain:()=>gain,createOscillator:()=>({frequency:param(frequencyRamps),detune:{value:0},connect(){},disconnect(){},start(){},stop(){}})};
+ engine.samples={piano:[{midi:66,cents:0,buffer:{}}]};engine.phraseNote(67,1,.3,{},1,{type:'slide',fromPitch:64});
+ assert.equal(rateRamps.length,0);
+ engine.samples=null;engine.phraseNote(67,2,.3,{},1,{type:'hammer',fromPitch:64});
+ assert.equal(frequencyRamps.length,0);
+});
+
+test('pause stops an active phrase preview and disabling stops every technique source',async()=>{
+ const engine=new AudioEngine();let previewStops=0,suspended=0,sourceStops=0;
+ engine.previewEngine={stop(){previewStops++;}};engine.context={suspend:async()=>{suspended++;}};engine.playing=true;
+ await engine.pause();assert.equal(previewStops,1);assert.equal(suspended,1);
+ engine.phraseSources.add({stop(){sourceStops++;}});engine.phraseSources.add({stop(){sourceStops++;}});engine.hearPhrases=true;engine.hearPhrases=false;
+ assert.equal(sourceStops,2);assert.equal(engine.phraseSources.size,0);
 });
 
  test('solo and melody controls remain independent',()=>{
@@ -284,6 +332,15 @@ test('held solo notes cross display cards without a second audio attack',()=>{
  engine.scheduleSoloPhrase({formIndex:0,barIndex:2,beat:0,time:4,duration:.5},4);
  assert.deepEqual(attacks.map(a=>[a[0],a[1]]),[[64,3.75],[65,4.5]]);
  assert.ok(engine.soloNoteQueue.some(n=>n.phraseId==='0-2'&&n.tie));
+});
+
+test('a tied live note attacks only when its prior source is not still held',()=>{
+ const engine=new AudioEngine();engine.hearPhrases=true;engine.timeline={beatsPerBar:4};const attacks=[];engine.phraseNote=(...args)=>attacks.push(args);
+ engine.setSoloPhrases([{id:'tie',formIndex:0,bars:[{barIndex:0}],riff:[{beat:0,duration:1,pitch:65,tie:true,articulation:{type:'pull',fromPitch:67},harmony:{pitch:69}}]}]);
+ const event={formIndex:0,barIndex:0,beat:0,time:2,duration:.5,countIn:false};engine.scheduleSoloPhrase(event,2);
+ assert.deepEqual(attacks.map(a=>[a[0],a[5]]),[[65,null],[69,null]]);
+ engine.soloNoteQueue=[{pitch:65,time:1.5,end:2.5}];engine.scheduleSoloPhrase(event,2);
+ assert.equal(attacks.length,2);
 });
 
 test('solo feel offsets attacks without moving releases or visual timing',()=>{

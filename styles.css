@@ -131,3 +131,4 @@ button{transition:scale 180ms cubic-bezier(.2,.8,.3,1),background-color 160ms,co
 .keyboard,.piano-solo .keyboard,.piano-voicings .keyboard{height:auto;aspect-ratio:var(--white-keys) / 6.3}
 .musical-typing-control{margin:0 0 20px}.musical-typing-control label{display:flex;align-items:center;gap:8px;min-height:44px}.musical-typing-control small{display:block;color:var(--muted)}
 .piano-key kbd{position:absolute;left:50%;bottom:38px;transform:translateX(-50%);font:11px Arial;color:inherit;pointer-events:none}
+.riff-articulation path{stroke:var(--accent);stroke-width:1.2}.riff-articulation text{font:bold 8px Arial;fill:var(--accent)}.riff-double-stop line{stroke:var(--accent);stroke-width:1.2}
